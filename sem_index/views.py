@@ -5,7 +5,6 @@ import traceback
 # import logging
 from django.http import JsonResponse
 from common import mongo_data, common, source_media, mysql_data, settings
-
 # Create your views here.
 
 # logger = logging.getLogger("django")  # 这里用__name__通用,自动检测.
@@ -21,12 +20,7 @@ def influence_show(request, company_id):
     :return:
     """
     data_source_id_list = mysql_data.get_data_source_id_list(int(company_id))
-    total_influence_dict = mongo_data.get_total_influence(data_source_id_list, paras=settings.MONGO_PARA)
-    total_influence_change_dict = mongo_data.get_total_influence_change(data_source_id_list,
-                                                                        paras=settings.MONGO_PARA)
-    contents = total_influence_dict.copy()
-    contents.update(total_influence_change_dict)
-    # contents = dict(total_influence_dict.items() + total_influence_change_dict.items())
+    contents = mongo_data.get_total_influence_change(data_source_id_list, paras=settings.MONGO_PARA)
     return JsonResponse(contents)
 
 
@@ -64,9 +58,15 @@ def today_sem(request, company_id):
     source_media_instance_dict = mongo_data.get_source_media_instance_dict(paras=settings.MONGO_PARA)
     contents = {}
     for key in source_media_instance_dict:
-        contents[key] = \
-            source_media_instance_dict[key].get_sentiment_influence(
-                data_source_id_list)["seven_sentiment_influence_dict"]
+        sentiment_statistics = source_media_instance_dict[key].get_sentiment_statistics(
+            data_source_id_list=data_source_id_list,
+            start_time=common.default_start_time,
+            end_time=common.default_end_time
+        )
+        contents[key] = {"negative": 0, "positive": 0, "neutral": 0}
+        for item in sentiment_statistics:
+            # 'negative', 'positive', 'neutral'
+            contents[key][item.get("_id")] += item.get("count")
     return JsonResponse(contents)
 
 
@@ -115,12 +115,18 @@ def weibo(request, company_id):
     :param company_id:
     :return:
     """
-    data_source_id_list = mysql_data.get_data_source_id_list(int(company_id))
-    weibo_instance = mongo_data.get_source_media_instance_dict(settings.MONGO_PARA)["weibo"]
-    weibo_obj = weibo_instance.get_sort_news_objects(data_source_id_list)["today_sort_news_objects"].clone().limit(10)
-    # 对weibo_obj进行序列化
-    weibo_obj_list = common.serialize_news_obj(weibo_obj)
-    contents = {"weibo_obj": weibo_obj_list}
+    # data_source_id_list = mysql_data.get_data_source_id_list(int(company_id))
+    data_source_id_list = mysql_data.get_data_source(int(company_id))
+
+    if len(data_source_id_list) > 0:
+        weibo_instance = mongo_data.get_source_media_instance_dict(settings.MONGO_PARA)["weibo"]
+        weibo_obj = \
+            weibo_instance.get_sort_news_objects(data_source_id_list)["today_sort_news_objects"].clone().limit(10)
+        # 对weibo_obj进行序列化
+        weibo_obj_list = common.serialize_news_obj(weibo_obj)
+        contents = {"weibo_obj": weibo_obj_list}
+    else:
+        contents = {}
     return JsonResponse(contents)
 
 

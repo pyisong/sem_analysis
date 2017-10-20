@@ -83,8 +83,12 @@ WSGI_APPLICATION = 'sem_analysis.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': "sem_analysis",
+        "HOST": "localhost",
+        "USER": "root",
+        "PASSWORD": "mysql",
+        "PORT": "3306",
     }
 }
 
@@ -114,100 +118,100 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': True,
-    'formatters': {
-        'standard': {
-            'format': '%(asctime)s [%(threadName)s:%(thread)d] [%(name)s:%(lineno)d] [%(levelname)s]- %(message)s'
-        },
-        'simple': {
-            'format': '%(levelname)s %(message)s'
-        }
-    },
-    'filters': {
-    },
-    'handlers': {
-        'mail_admins': {
-            'level': 'ERROR',
-            'class': 'django.utils.log.AdminEmailHandler',
-            'include_html': True,
-        },
-        'default': {
-            'level': 'DEBUG',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': os.path.join(STATIC_ROOT+'/logs/', 'all.log'),
-            'maxBytes': 1024*1024*5,  # 5 MB
-            'backupCount': 5,
-            'formatter': 'standard',
-        },
-        'console': {
-            'level': 'DEBUG',
-            'class': 'logging.StreamHandler',
-            'formatter': 'standard'
-        },
-        'request_handler': {
-            'level': 'DEBUG',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': os.path.join(STATIC_ROOT+'/logs/', 'script.log'),
-            'maxBytes': 1024*1024*5,  # 5 MB
-            'backupCount': 5,
-            'formatter': 'standard',
-        },
-        'scripts_handler': {
-            'level': 'DEBUG',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': os.path.join(STATIC_ROOT+'/logs/', 'script.log'),
-            'maxBytes': 1024*1024*5,  # 5 MB
-            'backupCount': 5,
-            'formatter': 'standard',
-        },
-    },
-    'loggers': {
-        'django': {
-            'handlers': ['default', 'console'],
-            'level': 'DEBUG',
-            'propagate': False
-        },
-        'sem_index': {
-            'handlers': ['default', 'console'],
-            'level': 'DEBUG',
-            'propagate': True
-        },
-        'company_influence': {
-            'handlers': ['default', 'console'],
-            'level': 'DEBUG',
-            'propagate': True
-        },
-        'product_influence': {
-            'handlers': ['default', 'console'],
-            'level': 'DEBUG',
-            'propagate': True
-        },
-        'event_influence': {
-            'handlers': ['default', 'console'],
-            'level': 'DEBUG',
-            'propagate': True
-        },
-        'sem_information': {
-            'handlers': ['default', 'console'],
-            'level': 'DEBUG',
-            'propagate': True
-        },
-        'app_info': {
-            'handlers': ['default', 'console'],
-            'level': 'DEBUG',
-            'propagate': True
-        },
-        'django.request': {
-            'handlers': ['request_handler'],
-            'level': 'DEBUG',
-            'propagate': False
-        },
-        'scripts': {  # 脚本专用日志
-            'handlers': ['scripts_handler'],
-            'level': 'INFO',
-            'propagate': False
-        },
-    }
-}
+# LOGGING = {
+#     'version': 1,
+#     'disable_existing_loggers': True,
+#     'formatters': {
+#         'standard': {
+#             'format': '%(asctime)s [%(threadName)s:%(thread)d] [%(name)s:%(lineno)d] [%(levelname)s]- %(message)s'
+#         },
+#         'simple': {
+#             'format': '%(levelname)s %(message)s'
+#         }
+#     },
+#     'filters': {
+#     },
+#     'handlers': {
+#         'mail_admins': {
+#             'level': 'ERROR',
+#             'class': 'django.utils.log.AdminEmailHandler',
+#             'include_html': True,
+#         },
+#         'default': {
+#             'level': 'DEBUG',
+#             'class': 'logging.handlers.RotatingFileHandler',
+#             'filename': os.path.join(STATIC_ROOT+'/logs/', 'all.log'),
+#             'maxBytes': 1024*1024*5,  # 5 MB
+#             'backupCount': 5,
+#             'formatter': 'standard',
+#         },
+#         'console': {
+#             'level': 'DEBUG',
+#             'class': 'logging.StreamHandler',
+#             'formatter': 'standard'
+#         },
+#         'request_handler': {
+#             'level': 'DEBUG',
+#             'class': 'logging.handlers.RotatingFileHandler',
+#             'filename': os.path.join(STATIC_ROOT+'/logs/', 'script.log'),
+#             'maxBytes': 1024*1024*5,  # 5 MB
+#             'backupCount': 5,
+#             'formatter': 'standard',
+#         },
+#         'scripts_handler': {
+#             'level': 'DEBUG',
+#             'class': 'logging.handlers.RotatingFileHandler',
+#             'filename': os.path.join(STATIC_ROOT+'/logs/', 'script.log'),
+#             'maxBytes': 1024*1024*5,  # 5 MB
+#             'backupCount': 5,
+#             'formatter': 'standard',
+#         },
+#     },
+#     'loggers': {
+#         'django': {
+#             'handlers': ['default', 'console'],
+#             'level': 'DEBUG',
+#             'propagate': False
+#         },
+#         'sem_index': {
+#             'handlers': ['default', 'console'],
+#             'level': 'DEBUG',
+#             'propagate': True
+#         },
+#         'company_influence': {
+#             'handlers': ['default', 'console'],
+#             'level': 'DEBUG',
+#             'propagate': True
+#         },
+#         'product_influence': {
+#             'handlers': ['default', 'console'],
+#             'level': 'DEBUG',
+#             'propagate': True
+#         },
+#         'event_influence': {
+#             'handlers': ['default', 'console'],
+#             'level': 'DEBUG',
+#             'propagate': True
+#         },
+#         'sem_information': {
+#             'handlers': ['default', 'console'],
+#             'level': 'DEBUG',
+#             'propagate': True
+#         },
+#         'app_info': {
+#             'handlers': ['default', 'console'],
+#             'level': 'DEBUG',
+#             'propagate': True
+#         },
+#         'django.request': {
+#             'handlers': ['request_handler'],
+#             'level': 'DEBUG',
+#             'propagate': False
+#         },
+#         'scripts': {  # 脚本专用日志
+#             'handlers': ['scripts_handler'],
+#             'level': 'INFO',
+#             'propagate': False
+#         },
+#     }
+# }

@@ -2,6 +2,7 @@
 import source_media
 import common
 from collections import Counter
+from settings import MONGO_PARA
 
 
 def get_source_media_instance_dict(paras):
@@ -39,9 +40,14 @@ def get_total_influence(data_source_id_list, paras, start_time=None, end_time=No
     total_yesterday_influence = 0
     total_today_negative_influence = 0
     total_yesterday_negative_influence = 0
-    total_seven_negative_influence = 0
-    total_user_defined_sentiment_influence = 0
-    total_user_defined_influence = 0
+    # total_seven_negative_influence = 0
+
+    if start_time and end_time:
+        total_user_defined_influence = 0
+        total_user_defined_negative_influence = 0
+    else:
+        total_user_defined_influence = None
+        total_user_defined_negative_influence = None
 
     for value in source_media_instance_dict.values():
         influence_dict = value.get_influence(data_source_id_list, start_time=start_time, end_time=end_time)
@@ -49,8 +55,18 @@ def get_total_influence(data_source_id_list, paras, start_time=None, end_time=No
                                                                  start_time=start_time,
                                                                  end_time=end_time)
 
-        total_user_defined_influence +=\
-            influence_dict.get("user_defined_influence") if influence_dict.get("user_defined_influence") else 0
+        if total_user_defined_influence and total_user_defined_negative_influence:
+            total_user_defined_influence +=\
+                influence_dict.get("user_defined_influence") if influence_dict.get("user_defined_influence") else 0
+
+            total_user_defined_sentiment_influence_dict = \
+                sentiment_influence_dict.get("user_defined_sentiment_influence_dict")
+
+            if total_user_defined_sentiment_influence_dict:
+                total_user_defined_negative_influence += total_user_defined_sentiment_influence_dict.get("negative")
+            else:
+                total_user_defined_negative_influence += 0
+
         total_seven_influence +=\
             influence_dict.get("seven_influence") if influence_dict.get("seven_influence") else 0
         total_last_seven_influence +=\
@@ -60,20 +76,12 @@ def get_total_influence(data_source_id_list, paras, start_time=None, end_time=No
         total_yesterday_influence +=\
             influence_dict.get("yesterday_influence") if influence_dict.get("yesterday_influence") else 0
 
-        total_user_defined_sentiment_influence_dict =\
-            sentiment_influence_dict.get("user_defined_sentiment_influence_dict")
-
-        if total_user_defined_sentiment_influence_dict:
-            total_user_defined_sentiment_influence += total_user_defined_sentiment_influence_dict.get("negative")
-        else:
-            total_user_defined_sentiment_influence += 0
-
         total_today_negative_influence += \
             sentiment_influence_dict["today_sentiment_influence_dict"]["negative"]
         total_yesterday_negative_influence += \
             sentiment_influence_dict["yesterday_sentiment_influence_dict"]["negative"]
-        total_seven_negative_influence += \
-            sentiment_influence_dict["seven_sentiment_influence_dict"]["negative"]
+        # total_seven_negative_influence += \
+        #     sentiment_influence_dict["seven_sentiment_influence_dict"]["negative"]
 
     total_influence_dict['total_seven_influence'] = total_seven_influence
     total_influence_dict['total_last_seven_influence'] = total_last_seven_influence
@@ -81,9 +89,11 @@ def get_total_influence(data_source_id_list, paras, start_time=None, end_time=No
     total_influence_dict['total_yesterday_influence'] = total_yesterday_influence
     total_influence_dict['total_today_negative_influence'] = total_today_negative_influence
     total_influence_dict['total_yesterday_negative_influence'] = total_yesterday_negative_influence
-    total_influence_dict['total_seven_negative_influence'] = total_seven_negative_influence
-    total_influence_dict['total_user_defined_sentiment_influence'] = total_seven_negative_influence
-    total_influence_dict['total_user_defined_influence'] = total_seven_negative_influence
+    # total_influence_dict['total_seven_negative_influence'] = total_seven_negative_influence
+    if total_user_defined_influence and total_user_defined_negative_influence:
+        total_influence_dict['total_user_defined_negative_influence'] = total_user_defined_negative_influence
+        total_influence_dict['total_user_defined_influence'] = total_user_defined_influence
+
     return total_influence_dict
 
 
@@ -156,7 +166,10 @@ def get_total_influence_change(data_source_id_list, paras, start_time=None, end_
     total_influence_change_dict["total_seven_influence_change"] = total_seven_influence_change
     total_influence_change_dict["total_day_influence_change"] = total_day_influence_change
     total_influence_change_dict["total_day_negative_influence_change"] = total_day_negative_influence_change
-    return total_influence_change_dict
+
+    contents = total_influence_dict.copy()
+    contents.update(total_influence_change_dict)
+    return contents
 
 
 def get_weibo_user_location_statistics(data_source_id_list, paras):
@@ -187,8 +200,12 @@ def get_hot_media_sort_list(data_source_id_list, paras):
     """
     source_media_instance_dict = get_source_media_instance_dict(paras)
     hot_media_list = []
+    time_dict = common.get_time()
     for key in source_media_instance_dict:
-        hot_media_objects = source_media_instance_dict[key].get_hot_media_objects(data_source_id_list)
+        hot_media_objects = source_media_instance_dict[key].get_hot_media_obj(data_source_id_list=data_source_id_list,
+                                                                              start_time=time_dict["seven_ago_time"],
+                                                                              end_time=time_dict["now_time"]
+                                                                              )
         if key in ["baidu_search", "zhihu"]:
             for item in hot_media_objects:
                 media = item.get("media") if item.get("author") else u"无"
@@ -233,3 +250,6 @@ def get_contents_expression(contents):
     """
     print contents
     pass
+
+if __name__ == '__main__':
+    print get_hot_media_sort_list(data_source_id_list=[2], paras=MONGO_PARA)

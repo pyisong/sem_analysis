@@ -1516,3 +1516,186 @@ Traceback (most recent call last):
     contents["reply_obj"] = reply_obj_list[0]
 IndexError: list index out of range
 2017-10-12 17:15:02,802 [Thread-3:8016] [django.request:170] [WARNING]- Not Found: /favicon.ico
+2017-10-13 15:13:06,234 [Thread-8:14728] [django.request:170] [WARNING]- Not Found: /favicon.ico
+2017-10-13 16:29:16,996 [Thread-3:12264] [django.request:170] [WARNING]- Not Found: /admin/sem_index/adminuserinfo/1/
+2017-10-13 16:35:02,753 [Thread-7:18776] [django.request:170] [WARNING]- Not Found: /
+2017-10-16 14:00:56,378 [Thread-3:10088] [django.request:170] [WARNING]- Not Found: /favicon.ico
+2017-10-16 14:14:11,246 [Thread-40:19244] [django.request:170] [WARNING]- Not Found: /
+2017-10-17 10:18:21,959 [Thread-3:15880] [django.request:170] [WARNING]- Not Found: /favicon.ico
+2017-10-17 17:06:33,992 [Thread-3:13724] [django.request:170] [WARNING]- Not Found: /favicon.ico
+2017-10-17 17:07:20,795 [Thread-3:10936] [django.request:256] [ERROR]- Internal Server Error: /admin/sem_index/datasourceid/
+Traceback (most recent call last):
+  File "D:\python27\lib\site-packages\django\core\handlers\base.py", line 132, in get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "D:\python27\lib\site-packages\django\contrib\admin\options.py", line 618, in wrapper
+    return self.admin_site.admin_view(view)(*args, **kwargs)
+  File "D:\python27\lib\site-packages\django\utils\decorators.py", line 110, in _wrapped_view
+    response = view_func(request, *args, **kwargs)
+  File "D:\python27\lib\site-packages\django\views\decorators\cache.py", line 57, in _wrapped_view_func
+    response = view_func(request, *args, **kwargs)
+  File "D:\python27\lib\site-packages\django\contrib\admin\sites.py", line 233, in inner
+    return view(request, *args, **kwargs)
+  File "D:\python27\lib\site-packages\django\utils\decorators.py", line 34, in _wrapper
+    return bound_func(*args, **kwargs)
+  File "D:\python27\lib\site-packages\django\utils\decorators.py", line 110, in _wrapped_view
+    response = view_func(request, *args, **kwargs)
+  File "D:\python27\lib\site-packages\django\utils\decorators.py", line 30, in bound_func
+    return func.__get__(self, type(self))(*args2, **kwargs2)
+  File "D:\python27\lib\site-packages\django\contrib\admin\options.py", line 1550, in changelist_view
+    self.list_max_show_all, self.list_editable, self)
+  File "D:\python27\lib\site-packages\django\contrib\admin\views\main.py", line 82, in __init__
+    self.get_results(request)
+  File "D:\python27\lib\site-packages\django\contrib\admin\views\main.py", line 177, in get_results
+    result_count = paginator.count
+  File "D:\python27\lib\site-packages\django\core\paginator.py", line 72, in _get_count
+    self._count = self.object_list.count()
+  File "D:\python27\lib\site-packages\django\db\models\query.py", line 318, in count
+    return self.query.get_count(using=self.db)
+  File "D:\python27\lib\site-packages\django\db\models\sql\query.py", line 466, in get_count
+    number = obj.get_aggregation(using, ['__count'])['__count']
+  File "D:\python27\lib\site-packages\django\db\models\sql\query.py", line 447, in get_aggregation
+    result = compiler.execute_sql(SINGLE)
+  File "D:\python27\lib\site-packages\django\db\models\sql\compiler.py", line 840, in execute_sql
+    cursor.execute(sql, params)
+  File "D:\python27\lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return super(CursorDebugWrapper, self).execute(sql, params)
+  File "D:\python27\lib\site-packages\django\db\backends\utils.py", line 64, in execute
+    return self.cursor.execute(sql, params)
+  File "D:\python27\lib\site-packages\django\db\utils.py", line 98, in __exit__
+    six.reraise(dj_exc_type, dj_exc_value, traceback)
+  File "D:\python27\lib\site-packages\django\db\backends\utils.py", line 64, in execute
+    return self.cursor.execute(sql, params)
+  File "D:\python27\lib\site-packages\django\db\backends\mysql\base.py", line 124, in execute
+    return self.cursor.execute(query, args)
+  File "D:\python27\lib\site-packages\MySQLdb\cursors.py", line 174, in execute
+    self.errorhandler(self, exc, value)
+  File "D:\python27\lib\site-packages\MySQLdb\connections.py", line 36, in defaulterrorhandler
+    raise errorclass, errorvalue
+ProgrammingError: (1146, "Table 'sem_analysis.sem_monitor_crawl_info' doesn't exist")
+2017-10-17 17:07:34,871 [Thread-8:8208] [django.request:256] [ERROR]- Internal Server Error: /admin/sem_index/datasourceid/
+Traceback (most recent call last):
+  File "D:\python27\lib\site-packages\django\core\handlers\base.py", line 132, in get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "D:\python27\lib\site-packages\django\contrib\admin\options.py", line 618, in wrapper
+    return self.admin_site.admin_view(view)(*args, **kwargs)
+  File "D:\python27\lib\site-packages\django\utils\decorators.py", line 110, in _wrapped_view
+    response = view_func(request, *args, **kwargs)
+  File "D:\python27\lib\site-packages\django\views\decorators\cache.py", line 57, in _wrapped_view_func
+    response = view_func(request, *args, **kwargs)
+  File "D:\python27\lib\site-packages\django\contrib\admin\sites.py", line 233, in inner
+    return view(request, *args, **kwargs)
+  File "D:\python27\lib\site-packages\django\utils\decorators.py", line 34, in _wrapper
+    return bound_func(*args, **kwargs)
+  File "D:\python27\lib\site-packages\django\utils\decorators.py", line 110, in _wrapped_view
+    response = view_func(request, *args, **kwargs)
+  File "D:\python27\lib\site-packages\django\utils\decorators.py", line 30, in bound_func
+    return func.__get__(self, type(self))(*args2, **kwargs2)
+  File "D:\python27\lib\site-packages\django\contrib\admin\options.py", line 1550, in changelist_view
+    self.list_max_show_all, self.list_editable, self)
+  File "D:\python27\lib\site-packages\django\contrib\admin\views\main.py", line 82, in __init__
+    self.get_results(request)
+  File "D:\python27\lib\site-packages\django\contrib\admin\views\main.py", line 177, in get_results
+    result_count = paginator.count
+  File "D:\python27\lib\site-packages\django\core\paginator.py", line 72, in _get_count
+    self._count = self.object_list.count()
+  File "D:\python27\lib\site-packages\django\db\models\query.py", line 318, in count
+    return self.query.get_count(using=self.db)
+  File "D:\python27\lib\site-packages\django\db\models\sql\query.py", line 466, in get_count
+    number = obj.get_aggregation(using, ['__count'])['__count']
+  File "D:\python27\lib\site-packages\django\db\models\sql\query.py", line 447, in get_aggregation
+    result = compiler.execute_sql(SINGLE)
+  File "D:\python27\lib\site-packages\django\db\models\sql\compiler.py", line 840, in execute_sql
+    cursor.execute(sql, params)
+  File "D:\python27\lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return super(CursorDebugWrapper, self).execute(sql, params)
+  File "D:\python27\lib\site-packages\django\db\backends\utils.py", line 64, in execute
+    return self.cursor.execute(sql, params)
+  File "D:\python27\lib\site-packages\django\db\utils.py", line 98, in __exit__
+    six.reraise(dj_exc_type, dj_exc_value, traceback)
+  File "D:\python27\lib\site-packages\django\db\backends\utils.py", line 64, in execute
+    return self.cursor.execute(sql, params)
+  File "D:\python27\lib\site-packages\django\db\backends\mysql\base.py", line 124, in execute
+    return self.cursor.execute(query, args)
+  File "D:\python27\lib\site-packages\MySQLdb\cursors.py", line 174, in execute
+    self.errorhandler(self, exc, value)
+  File "D:\python27\lib\site-packages\MySQLdb\connections.py", line 36, in defaulterrorhandler
+    raise errorclass, errorvalue
+ProgrammingError: (1146, "Table 'sem_analysis.sem_monitor_crawl_info' doesn't exist")
+2017-10-18 09:25:15,961 [Thread-4:8984] [django.request:170] [WARNING]- Not Found: /favicon.ico
+2017-10-18 10:08:57,394 [Thread-2:20688] [django.request:256] [ERROR]- Internal Server Error: /sem_index/weibo_2/
+Traceback (most recent call last):
+  File "D:\python27\lib\site-packages\django\core\handlers\base.py", line 132, in get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "D:\github\sem_analysis\sem_index\views.py", line 121, in weibo
+    weibo_obj = weibo_instance.get_sort_news_objects(data_source_id_list)["today_sort_news_objects"].clone().limit(10)
+  File "D:\github\sem_analysis\common\source_media.py", line 200, in get_sort_news_objects
+    end_time=self.time_dict["now_time"])["sort_news_objects"],
+  File "D:\github\sem_analysis\common\source_media.py", line 483, in _get_news
+    news_count = news_objects.count()
+  File "D:\python27\lib\site-packages\pymongo\cursor.py", line 711, in count
+    return self.__collection._count(cmd, self.__collation)
+  File "D:\python27\lib\site-packages\pymongo\collection.py", line 1310, in _count
+    collation=collation)
+  File "D:\python27\lib\site-packages\pymongo\collection.py", line 232, in _command
+    collation=collation)
+  File "D:\python27\lib\site-packages\pymongo\pool.py", line 419, in command
+    collation=collation)
+  File "D:\python27\lib\site-packages\pymongo\network.py", line 116, in command
+    parse_write_concern_error=parse_write_concern_error)
+  File "D:\python27\lib\site-packages\pymongo\helpers.py", line 210, in _check_command_response
+    raise OperationFailure(msg % errmsg, code, response)
+OperationFailure: failed on : shard3RS
+2017-10-18 10:37:35,970 [Thread-4:14848] [django.request:256] [ERROR]- Internal Server Error: /sem_index/weibo_1/
+Traceback (most recent call last):
+  File "D:\python27\lib\site-packages\django\core\handlers\base.py", line 132, in get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "D:\github\sem_analysis\sem_index\views.py", line 126, in weibo
+    weibo_obj = weibo_instance.get_sort_news_objects(data_source_id_list)["today_sort_news_objects"].clone().limit(10)
+  File "D:\github\sem_analysis\common\source_media.py", line 200, in get_sort_news_objects
+    end_time=self.time_dict["now_time"])["sort_news_objects"],
+  File "D:\github\sem_analysis\common\source_media.py", line 483, in _get_news
+    news_count = news_objects.count()
+  File "D:\python27\lib\site-packages\pymongo\cursor.py", line 711, in count
+    return self.__collection._count(cmd, self.__collation)
+  File "D:\python27\lib\site-packages\pymongo\collection.py", line 1310, in _count
+    collation=collation)
+  File "D:\python27\lib\site-packages\pymongo\collection.py", line 232, in _command
+    collation=collation)
+  File "D:\python27\lib\site-packages\pymongo\pool.py", line 424, in command
+    self._raise_connection_failure(error)
+  File "D:\python27\lib\site-packages\pymongo\pool.py", line 552, in _raise_connection_failure
+    raise error
+InvalidDocument: Cannot encode object: <SemMonitorCrawlInfo: 鑵捐绉戞妧>
+2017-10-18 10:51:26,240 [Thread-2:12676] [django.request:256] [ERROR]- Internal Server Error: /sem_index/weibo_1/
+Traceback (most recent call last):
+  File "D:\python27\lib\site-packages\django\core\handlers\base.py", line 132, in get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "D:\github\sem_analysis\sem_index\views.py", line 128, in weibo
+    weibo_obj = weibo_instance.get_sort_news_objects(data_source_id_list)["today_sort_news_objects"].clone().limit(10)
+  File "D:\github\sem_analysis\common\source_media.py", line 200, in get_sort_news_objects
+    end_time=self.time_dict["now_time"])["sort_news_objects"],
+  File "D:\github\sem_analysis\common\source_media.py", line 483, in _get_news
+    news_count = news_objects.count()
+  File "D:\python27\lib\site-packages\pymongo\cursor.py", line 711, in count
+    return self.__collection._count(cmd, self.__collation)
+  File "D:\python27\lib\site-packages\pymongo\collection.py", line 1310, in _count
+    collation=collation)
+  File "D:\python27\lib\site-packages\pymongo\collection.py", line 232, in _command
+    collation=collation)
+  File "D:\python27\lib\site-packages\pymongo\pool.py", line 424, in command
+    self._raise_connection_failure(error)
+  File "D:\python27\lib\site-packages\pymongo\pool.py", line 552, in _raise_connection_failure
+    raise error
+InvalidDocument: Cannot encode object: <SemMonitorCrawlInfo: 腾讯科技>
+2017-10-18 10:55:59,424 [Thread-2:4904] [django.request:256] [ERROR]- Internal Server Error: /sem_index/weibo_1/
+Traceback (most recent call last):
+  File "D:\python27\lib\site-packages\django\core\handlers\base.py", line 132, in get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "D:\github\sem_analysis\sem_index\views.py", line 121, in weibo
+    if len(data_source_id_list) > 0:
+TypeError: object of type 'NoneType' has no len()
+2017-10-19 15:10:32,486 [Thread-4:11364] [django.request:170] [WARNING]- Not Found: /favicon.ico
+2017-10-20 09:28:34,928 [Thread-9:17800] [django.request:170] [WARNING]- Not Found: /favicon.ico
+2017-10-20 09:51:53,855 [Thread-2:14308] [django.request:170] [WARNING]- Not Found: /sem_index/
+2017-10-20 10:50:43,434 [Thread-5:16368] [django.request:170] [WARNING]- Not Found: /sem_index/influence_show/2/influence_directive
+2017-10-20 10:50:51,671 [Thread-6:18832] [django.request:170] [WARNING]- Not Found: /sem_index/today_hot_2/
