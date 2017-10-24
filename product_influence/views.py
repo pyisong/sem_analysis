@@ -9,7 +9,7 @@ from common import mysql_data, mongo_data, settings, common
 # logger.error(__name__)
 
 
-def product_search_exponent(request):
+def pro_search_exponent(request):
     """
     搜索曲线
     :param request:
@@ -18,79 +18,75 @@ def product_search_exponent(request):
     pass
 
 
-def product_sentiment_statistics(request, product_id):
+def pro_weixin_expression(request, pro_id):
     """
     统计7天，产品相关微信及相关微信评论中的表情的前三名
     :param request:
-    :param product_id:
+    :param pro_id:
     :return:
     """
     pass
 
 
-def product_information_influence(request, product_id):
+def pro_inform_infl(request, pro_id):
     """
     产品相关资讯影响力
     :param request:
-    :param product_id:
+    :param pro_id:
     :return:
     """
-    data_source_id_list = mysql_data.get_data_source_id_list(int(product_id))
-    total_influence_dict = mongo_data.get_total_influence(data_source_id_list, paras=settings.MONGO_PARA)
-    total_seven_influence = total_influence_dict["total_seven_influence"]
-    total_seven_negative_influence = total_influence_dict["total_seven_negative_influence"]
+    data_sour_id_list = mysql_data.get_data_sour_id_list(int(pro_id))
+    tal_infl_dict = mongo_data.get_tal_infl(data_sour_id_list, paras=settings.MONGO_PARA)
+    tal_sev_infl = tal_infl_dict["tal_sev_infl"]
+    tal_sev_neg_infl = tal_infl_dict["tal_sev_neg_infl"]
 
     contents = {
-        "total_seven_influence": total_seven_influence,
-        "total_seven_negative_influence": total_seven_negative_influence
+        "tal_sev_infl": tal_sev_infl,
+        "tal_sev_neg_infl": tal_sev_neg_infl
     }
 
     return JsonResponse(contents)
 
 
-def product_data_statistics(request, product_id):
+def pro_data_stas(request, pro_id):
     """
     产品相关各个媒体的影响力统计
     :param request:
-    :param product_id:
+    :param pro_id:
     :return:
     """
     start_time = request.POST.get("start_time", common.default_start_time)
     end_time = request.POST.get("end_time", common.default_end_time)
-    data_source_id_list = mysql_data.get_data_source_id_list(int(product_id))
-    source_media_instance_dict = mongo_data.get_source_media_instance_dict(paras=settings.MONGO_PARA)
-    single_media_dict = {}
-    for key in source_media_instance_dict:
-        single_media_dict[key] =\
-            source_media_instance_dict[key].get_influence(data_source_id_list,
-                                                          start_time=start_time,
-                                                          end_time=end_time)["user_defined_influence"]
+    data_sour_id_list = mysql_data.get_data_sour_id_list(int(pro_id))
+    sour_med_ins_dict = mongo_data.get_sour_med_ins_dict(paras=settings.MONGO_PARA)
+    sgl_med_dict = {}
+    for key in sour_med_ins_dict:
+        sgl_med_dict[key] = sour_med_ins_dict[key].get_infl(data_sour_id_list,
+                                                            start_time=start_time, end_time=end_time)["usr_def_infl"]
 
-    return JsonResponse(single_media_dict)
+    return JsonResponse(sgl_med_dict)
 
 
-def product_weibo_user_location(request, product_id):
+def pro_weibo_usr_loc(request, pro_id):
     """
     产品相关微博用户的地区分布详情
     :param request:
-    :param product_id:
+    :param pro_id:
     :return:
     """
-    data_source_id_list = mysql_data.get_data_source_id_list(int(product_id))
-    location_statistics_dict = mongo_data.get_weibo_user_location_statistics(data_source_id_list,
-                                                                             paras=settings.MONGO_PARA)
-    return JsonResponse(location_statistics_dict)
+    data_sour_id_list = mysql_data.get_data_sour_id_list(int(pro_id))
+    loc_stas_dict = mongo_data.get_weibo_usr_loc_stas(data_sour_id_list, paras=settings.MONGO_PARA)
+    return JsonResponse(loc_stas_dict)
 
 
-def product_hot_media(request, product_id):
+def pro_hot_med(request, pro_id):
     """
     产品相关热门媒体排序
     :param request:
-    :param product_id:
+    :param pro_id:
     :return:
     """
-    data_source_id_list = mysql_data.get_data_source_id_list(int(product_id))
-    hot_media_sort_list = mongo_data.get_hot_media_sort_list(data_source_id_list,
-                                                             paras=settings.MONGO_PARA)[:10]
-    contents = {"hot_media_sort_list": hot_media_sort_list}
+    data_sour_id_list = mysql_data.get_data_sour_id_list(int(pro_id))
+    hot_med_sort_list = mongo_data.get_hot_med_sort_list(data_sour_id_list, paras=settings.MONGO_PARA)[:10]
+    contents = {"hot_med_sort_list": hot_med_sort_list}
     return JsonResponse(contents)

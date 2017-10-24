@@ -7,9 +7,9 @@ from collections import Counter
 
 
 MONGO_PARA = "mongodb://access_mongo:donewsusemongodbby20170222@slave07:27017/admin?readPreference=secondaryPreferred"
+DB = "sem_test"
 
-
-INFLUENCE_SCALE = {
+INFL_SCALE = {
     "baidu_search": 0.3,
     "baidu_tieba": 0.6,
     "baidu_zhidao": 0.8,
@@ -43,8 +43,8 @@ def get_mysql_db_test():
 
 def get_mongodb_client(paras):
     try:
-        client = pymongo.MongoClient(paras)
-        return client
+        cli = pymongo.MongoClient(paras)
+        return cli
     except Exception as e:
         logging.error("Connect mongo Error:", e)
         return None
@@ -53,15 +53,15 @@ def get_mongodb_client(paras):
 if __name__ == "__main__":
     client = get_mongodb_client(MONGO_PARA)
     db = client["sem_test"]
-    # obj = db["search_weibo"].find({"data_source_id": 2}).sort("-publish_time")
-    # obj1 = db["search_weibo"].find({"data_source_id": 2,
+    # obj = db["search_weibo"].find({"data_sour_id": 2}).sort("-publish_time")
+    # obj1 = db["search_weibo"].find({"data_sour_id": 2,
     #                                "publish_time": {"$gte": "2017-01-03 19:00:00",
     #                                                 "$lte": "2017-01-03 19:20:00"}})
-    # obj2 = db["zhidao"].find({"data_source_id": "t_20170301_005",
+    # obj2 = db["zhidao"].find({"data_sour_id": "t_20170301_005",
     #                           "publish_time": {"$gte": "2016-05-06 00:00:00",
     #                                            "$lte": "2017-01-03 19:20:00"}})
 
-    # result = db["search_weibo"].aggregate([{"$group": {"_id": "$data_source_id", "count": {"$sum": 1}}}])
+    # result = db["search_weibo"].aggregate([{"$group": {"_id": "$data_sour_id", "count": {"$sum": 1}}}])
     # print result
     # temp_dict = {}
     # for i in result:
@@ -71,7 +71,7 @@ if __name__ == "__main__":
     # print type(result)
 
     result = db["search_baidu"].aggregate([
-                                     {"$match": {"$or": [{"data_source_id": i} for i in [1, 2, 3]]}},
+                                     {"$match": {"$or": [{"data_sour_id": i} for i in [1, 2, 3]]}},
                                                                   {"$group": {"_id": "$sentiment",
                                                                               "count": {"$sum": 1}}}])
 

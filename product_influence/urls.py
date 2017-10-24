@@ -3,13 +3,10 @@ from django.conf.urls import url
 from product_influence import views
 
 urlpatterns = [
-    url(r'^product_search_exponent/$', views.product_search_exponent, name="product_search_exponent"),
-    url(r'^product_sentiment_statistics_(\d*?)/$', views.product_sentiment_statistics,
-        name="product_sentiment_statistics"),
-    url(r'^product_information_influence_(\d*?)/$', views.product_information_influence,
-        name="product_information_influence"),
-    url(r'^product_data_statistics_(\d*?)/$', views.product_data_statistics, name="product_data_statistics"),
-    url(r'^product_weibo_user_location_(\d*?)/$', views.product_weibo_user_location,
-        name="product_weibo_user_location"),
-    url(r'^product_hot_media_(\d*?)/$', views.product_hot_media, name="product_hot_media"),
+    url(r'^pro_search_exponent/$', views.pro_search_exponent, name="pro_search_exponent"),
+    url(r'^pro_weixin_expression/(\d*?)/$', views.pro_weixin_expression, name="pro_weixin_expression"),
+    url(r'^pro_inform_infl/(\d*?)/$', views.pro_inform_infl, name="pro_inform_infl"),
+    url(r'^pro_data_stas/(\d*?)/$', views.pro_data_stas, name="pro_data_stas"),
+    url(r'^pro_weibo_usr_loc/(\d*?)/$', views.pro_weibo_usr_loc, name="pro_weibo_usr_loc"),
+    url(r'^pro_hot_med/(\d*?)/$', views.pro_hot_med, name="pro_hot_med"),
 ]

@@ -12,15 +12,15 @@ from common import mongo_data, common, source_media, mysql_data, settings
 # logger.error(__name__)
 
 
-def influence_show(request, company_id):
+def infl_show(request, company_id):
     """
     影响力对比展示
     :param company_id:
     :param request:
     :return:
     """
-    data_source_id_list = mysql_data.get_data_source_id_list(int(company_id))
-    contents = mongo_data.get_total_influence_change(data_source_id_list, paras=settings.MONGO_PARA)
+    data_sour_id_list = mysql_data.get_data_sour_id_list(int(company_id))
+    contents = mongo_data.get_tal_infl_chg(data_sour_id_list, paras=settings.MONGO_PARA)
     return JsonResponse(contents)
 
 
@@ -33,78 +33,77 @@ def search_exponent(request):
     pass
 
 
-def influence_directive(request, company_id):
+def infl_dire(request, company_id):
     """
     影响力导向
     :param request:
     :param company_id:
     :return:
     """
-    data_source_id_list = mysql_data.get_data_source_id_list(int(company_id))
-    sentiment_influence_dict = mongo_data.get_sentiment_influence(data_source_id_list,
-                                                                  paras=settings.MONGO_PARA)
-    contents = sentiment_influence_dict
+    data_sour_id_list = mysql_data.get_data_sour_id_list(int(company_id))
+    sent_infl_dict = mongo_data.get_sent_infl(data_sour_id_list, paras=settings.MONGO_PARA)
+    contents = sent_infl_dict
     return JsonResponse(contents)
 
 
-def today_sem(request, company_id):
+def tod_sem(request, company_id):
     """
     今日舆情(最近7天的分别列出不同数据源的不同情感的影响力)
     :param request:
     :param company_id:
     :return:
     """
-    data_source_id_list = mysql_data.get_data_source_id_list(int(company_id))
-    source_media_instance_dict = mongo_data.get_source_media_instance_dict(paras=settings.MONGO_PARA)
+    data_sour_id_list = mysql_data.get_data_sour_id_list(int(company_id))
+    sour_med_ins_dict = mongo_data.get_sour_med_ins_dict(paras=settings.MONGO_PARA)
     contents = {}
-    for key in source_media_instance_dict:
-        sentiment_statistics = source_media_instance_dict[key].get_sentiment_statistics(
-            data_source_id_list=data_source_id_list,
+    for key in sour_med_ins_dict:
+        sent_statistics = sour_med_ins_dict[key].get_sent_statistics(
+            data_sour_id_list=data_sour_id_list,
             start_time=common.default_start_time,
             end_time=common.default_end_time
         )
         contents[key] = {"negative": 0, "positive": 0, "neutral": 0}
-        for item in sentiment_statistics:
+        for item in sent_statistics:
             # 'negative', 'positive', 'neutral'
             contents[key][item.get("_id")] += item.get("count")
     return JsonResponse(contents)
 
 
-def today_hot(request, company_id):
+def tod_hot(request, company_id):
     """
     今日热点
     :param request:
     :param company_id:
     :return:
     """
-    data_source_id_list = mysql_data.get_data_source_id_list(int(company_id))
-    today_hot_dict = {}
-    source_media_instance_dict = mongo_data.get_source_media_instance_dict(paras=settings.MONGO_PARA)
-    for key, value in source_media_instance_dict.items():
+    data_sour_id_list = mysql_data.get_data_sour_id_list(int(company_id))
+    tod_hot_dict = {}
+    sour_med_ins_dict = mongo_data.get_sour_med_ins_dict(paras=settings.MONGO_PARA)
+    for key, value in sour_med_ins_dict.items():
         try:
-            result = value.get_sort_news_objects(data_source_id_list)["today_sort_news_objects"].clone()[:1]
-            today_hot_dict[key] = common.serialize_news_obj(result)
+            result = value.get_sort_news_objs(data_sour_id_list)["tod_sort_news_objs"].clone()[:1]
+            tod_hot_dict[key] = common.seria_news_obj(result)
         except IndexError:
             print (traceback.print_exc())
-    return JsonResponse(today_hot_dict)
+    return JsonResponse(tod_hot_dict)
 
 
-def today_information(request, company_id):
+def tod_inform(request, company_id):
     """
     资讯
     :param request:
     :param company_id:
     :return:
     """
-    data_source_id_list = mysql_data.get_data_source_id_list(int(company_id))
-    today_dif_information_list = []
-    source_media_instance_dict = mongo_data.get_source_media_instance_dict(paras=settings.MONGO_PARA)
+    data_sour_id_list = mysql_data.get_data_sour_id_list(int(company_id))
+    tod_dif_inform_list = []
+    sour_med_ins_dict = mongo_data.get_sour_med_ins_dict(paras=settings.MONGO_PARA)
     for key in ["baidu_search", "weixin", "zhihu"]:
-        today_dif_information_list.append(
-            source_media_instance_dict[key].get_sort_news_objects(
-                data_source_id_list)["today_sort_news_objects"].clone().limit(10))
-    information_list = common.sort_dif_data_source_obj(today_dif_information_list)[:10]
-    contents = {"information": information_list}
+        tod_dif_inform_list.append(
+            sour_med_ins_dict[key].get_sort_news_objs(
+                data_sour_id_list)["tod_sort_news_objs"].clone().limit(10))
+    inform_list = common.sort_dif_data_sour_obj(tod_dif_inform_list)[:10]
+    contents = {"inform": inform_list}
     return JsonResponse(contents)
 
 
@@ -115,15 +114,15 @@ def weibo(request, company_id):
     :param company_id:
     :return:
     """
-    # data_source_id_list = mysql_data.get_data_source_id_list(int(company_id))
-    data_source_id_list = mysql_data.get_data_source(int(company_id))
+    # data_sour_id_list = mysql_data.get_data_sour_id_list(int(company_id))
+    data_sour_id_list = mysql_data.get_data_sour_id_list(int(company_id))
 
-    if len(data_source_id_list) > 0:
-        weibo_instance = mongo_data.get_source_media_instance_dict(settings.MONGO_PARA)["weibo"]
+    if len(data_sour_id_list) > 0:
+        weibo_ins = mongo_data.get_sour_med_ins_dict(settings.MONGO_PARA)["weibo"]
         weibo_obj = \
-            weibo_instance.get_sort_news_objects(data_source_id_list)["today_sort_news_objects"].clone().limit(10)
+            weibo_ins.get_sort_news_objs(data_sour_id_list)["tod_sort_news_objs"].clone().limit(10)
         # 对weibo_obj进行序列化
-        weibo_obj_list = common.serialize_news_obj(weibo_obj)
+        weibo_obj_list = common.seria_news_obj(weibo_obj)
         contents = {"weibo_obj": weibo_obj_list}
     else:
         contents = {}
@@ -137,13 +136,15 @@ def baidu_zhidao(request, company_id):
     :param company_id:
     :return:
     """
-    data_source_id_list = mysql_data.get_data_source_id_list(int(company_id))
-    baidu_zhidao_instance = mongo_data.get_source_media_instance_dict(paras=settings.MONGO_PARA)["baidu_zhidao"]
-    baidu_zhidao_obj = baidu_zhidao_instance.get_sort_news_objects(
-        data_source_id_list)["today_sort_news_objects"].clone().limit(10)
-    # 对baidu_zhidao_obj进行序列化
-    baidu_zhidao_obj_list = common.serialize_news_obj(baidu_zhidao_obj)
-    contents = {"baidu_zhidao_obj": baidu_zhidao_obj_list}
+    data_sour_id_list = mysql_data.get_data_sour_id_list(int(company_id))
+    sour_med_ins_dict = mongo_data.get_sour_med_ins_dict(paras=settings.MONGO_PARA)
+    zhidao_tieba_list = []
+    for key in ["baidu_zhidao", "baidu_tieba"]:
+        zhidao_tieba_list.append(
+            sour_med_ins_dict[key].get_sort_news_objs(
+                data_sour_id_list)["tod_sort_news_objs"].clone().limit(10))
+    zhidao_tieba_sort_list = common.sort_dif_data_sour_obj(zhidao_tieba_list)[:10]
+    contents = {"baidu_zhidao_tieba": zhidao_tieba_sort_list}
     return JsonResponse(contents)
 
 
@@ -154,13 +155,15 @@ def app_info(request, company_id):
     :param company_id:
     :return:
     """
-    data_source_id_list = mysql_data.get_data_source_id_list(int(company_id))
-    app_store_instance = source_media.AppStore(paras=settings.MONGO_PARA)
-    app_bangdan_info = app_store_instance.get_app_bangdan_info_obj(data_source_id_list)
-    app_comments_info = app_store_instance.get_app_comments_info(data_source_id_list)
-    app_detail = app_store_instance.get_app_detail_obj(data_source_id_list)
-    contents = {"app_bangdan_info": app_bangdan_info,
-                "app_comments_info": app_comments_info,
-                "app_detail": app_detail}
+    data_sour_id_list = mysql_data.get_data_sour_id_list(int(company_id))
+    app_store_ins = source_media.AppStore(paras=settings.MONGO_PARA)
+    app_bd_info = app_store_ins.get_app_bd_info_obj(data_sour_id_list)
+    app_comts_info = app_store_ins.get_app_comts_info(data_sour_id_list)
+    # app_detail = app_store_ins.get_app_detail_obj(data_sour_id_list)
+    contents = {
+        "app_bd_info": app_bd_info,
+        "sent_count_dict": app_comts_info["sent_count_dict"],
+        "rating_count_dict": app_comts_info["rating_count_dict"],
+                }
 
     return JsonResponse(contents)

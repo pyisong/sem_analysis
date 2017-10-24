@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 
-from settings import get_mongodb_client, INFLUENCE_SCALE
-from common import get_time, serialize_news_obj
+from settings import get_mongodb_client, INFL_SCALE, DB
+from common import get_time, seria_news_obj
 
 
 class BaseSourceMedia(object):
@@ -10,232 +10,244 @@ class BaseSourceMedia(object):
         """
         连接到指定的mongodb数据库
         """
-        self._db = get_mongodb_client(paras)['sem_test']
+        self._db = get_mongodb_client(paras)[DB]
         self.time_dict = get_time()
-        self.influence_scale = 0
+        self.infl_scale = 0
 
-    def _get_news(self, data_source_id_list, start_time, end_time, sentiment=None):
+    def _get_news(self, data_sour_id_list, start_time, end_time, sent=None):
         """
         新闻影响力和新闻对象
-        :param data_source_id_list:
+        :param data_sour_id_list:
         :param start_time:
         :param end_time:
-        :param sentiment:
+        :param sent:
         :return:
         """
         return {}
 
-    def get_influence(self, data_source_id_list, start_time=None, end_time=None):
+    def get_infl(self, data_sour_id_list, start_time=None, end_time=None):
         """
         最近7天、上个7天、今天、昨天的影响力
         :param end_time:
         :param start_time:
-        :param data_source_id_list:
+        :param data_sour_id_list:
         :return:
         """
-        influence_dict = {}
+        infl_dict = {}
         if start_time and end_time:
-            user_defined_influence = self.get_news_count(data_source_id_list=data_source_id_list,
-                                                         start_time=start_time,
-                                                         end_time=end_time) * self.influence_scale
-            influence_dict["user_defined_influence"] = user_defined_influence
+            usr_def_infl = self.get_news_count(data_sour_id_list=data_sour_id_list,
+                                               start_time=start_time,
+                                               end_time=end_time) * self.infl_scale
+            infl_dict["usr_def_infl"] = usr_def_infl
+        else:
+            sev_infl = self.get_news_count(data_sour_id_list=data_sour_id_list,
+                                           start_time=self.time_dict["sev_ago_time"],
+                                           end_time=self.time_dict["now_time"]) * self.infl_scale
 
-        seven_influence = self.get_news_count(data_source_id_list=data_source_id_list,
-                                              start_time=self.time_dict["seven_ago_time"],
-                                              end_time=self.time_dict["now_time"]) * self.influence_scale
+            last_sev_infl = self.get_news_count(data_sour_id_list=data_sour_id_list,
+                                                start_time=self.time_dict["fourteen_ago_time"],
+                                                end_time=self.time_dict["sev_ago_time"]) * self.infl_scale
 
-        last_seven_influence = self.get_news_count(data_source_id_list=data_source_id_list,
-                                                   start_time=self.time_dict["fourteen_ago_time"],
-                                                   end_time=self.time_dict["seven_ago_time"]) * self.influence_scale
+            tod_infl = self.get_news_count(data_sour_id_list=data_sour_id_list,
+                                           start_time=self.time_dict["tod_start_time"],
+                                           end_time=self.time_dict["now_time"]) * self.infl_scale
 
-        today_influence = self.get_news_count(data_source_id_list=data_source_id_list,
-                                              start_time=self.time_dict["today_start_time"],
-                                              end_time=self.time_dict["now_time"]) * self.influence_scale
+            yest_infl = self.get_news_count(data_sour_id_list=data_sour_id_list,
+                                            start_time=self.time_dict["yest_time"],
+                                            end_time=self.time_dict["tod_start_time"]) * self.infl_scale
 
-        yesterday_influence = self.get_news_count(data_source_id_list=data_source_id_list,
-                                                  start_time=self.time_dict["yesterday_time"],
-                                                  end_time=self.time_dict["today_start_time"]) * self.influence_scale
+            infl_dict["sev_infl"] = sev_infl
+            infl_dict["last_sev_infl"] = last_sev_infl
+            infl_dict["tod_infl"] = tod_infl
+            infl_dict["yest_infl"] = yest_infl
 
-        influence_dict["seven_influence"] = seven_influence
-        influence_dict["last_seven_influence"] = last_seven_influence
-        influence_dict["today_influence"] = today_influence
-        influence_dict["yesterday_influence"] = yesterday_influence
-        return influence_dict
+        return infl_dict
 
-    def get_sentiment_influence(self, data_source_id_list, start_time=None, end_time=None):
+    def get_sent_infl(self, data_sour_id_list, start_time=None, end_time=None):
         """
         根据情感值分别得到不同情感值的影响力
         :param end_time:
         :param start_time:
-        :param data_source_id_list:
+        :param data_sour_id_list:
         :return:
         """
-        sentiment_influence_dict = {}  # 存储不同时间段、不同情感值的影响力
-        today_sentiment_influence_dict = {}
-        yesterday_sentiment_influence_dict = {}
-        seven_sentiment_influence_dict = {}
-        user_defined_sentiment_influence_dict = {}
-        sentiment_list = ['negative', 'positive', 'neutral']
+        sent_infl_dict = {}  # 存储不同时间段、不同情感值的影响力
+        tod_sent_infl_dict = {}
+        yest_sent_infl_dict = {}
+        sev_sent_infl_dict = {}
+        usr_def_sent_infl_dict = {}
+        sent_list = ['negative', 'positive', 'neutral']
 
-        for sentiment in sentiment_list:
+        for sent in sent_list:
             if start_time and end_time:
-                user_defined_sentiment_influence = self.get_news_count(data_source_id_list=data_source_id_list,
-                                                                       start_time=start_time,
-                                                                       end_time=end_time,
-                                                                       sentiment=sentiment) * self.influence_scale
-                user_defined_sentiment_influence_dict[sentiment] = user_defined_sentiment_influence
+                usr_def_sent_infl = self.get_news_count(data_sour_id_list=data_sour_id_list,
+                                                        start_time=start_time,
+                                                        end_time=end_time,
+                                                        sent=sent) * self.infl_scale
+                usr_def_sent_infl_dict[sent] = usr_def_sent_infl
+            else:
+                tod_sent_infl = self.get_news_count(data_sour_id_list=data_sour_id_list,
+                                                    start_time=self.time_dict["tod_start_time"],
+                                                    end_time=self.time_dict["now_time"],
+                                                    sent=sent) * self.infl_scale
+                
+                yest_sent_infl = self.get_news_count(data_sour_id_list=data_sour_id_list,
+                                                     start_time=self.time_dict["tod_start_time"],
+                                                     end_time=self.time_dict["now_time"],
+                                                     sent=sent) * self.infl_scale
+                
+                sev_sent_infl = self.get_news_count(data_sour_id_list=data_sour_id_list,
+                                                    start_time=self.time_dict["sev_ago_time"],
+                                                    end_time=self.time_dict["now_time"],
+                                                    sent=sent) * self.infl_scale
 
-            today_sentiment_influence = self.get_news_count(data_source_id_list=data_source_id_list,
-                                                            start_time=self.time_dict["today_start_time"],
-                                                            end_time=self.time_dict["now_time"],
-                                                            sentiment=sentiment) * self.influence_scale
-            yesterday_sentiment_influence = self.get_news_count(data_source_id_list=data_source_id_list,
-                                                                start_time=self.time_dict["today_start_time"],
-                                                                end_time=self.time_dict["now_time"],
-                                                                sentiment=sentiment) * self.influence_scale
-            seven_sentiment_influence = self.get_news_count(data_source_id_list=data_source_id_list,
-                                                            start_time=self.time_dict["seven_ago_time"],
-                                                            end_time=self.time_dict["now_time"],
-                                                            sentiment=sentiment) * self.influence_scale
+                tod_sent_infl_dict[sent] = tod_sent_infl
+                yest_sent_infl_dict[sent] = yest_sent_infl
+                sev_sent_infl_dict[sent] = sev_sent_infl
 
-            today_sentiment_influence_dict[sentiment] = today_sentiment_influence
-            yesterday_sentiment_influence_dict[sentiment] = yesterday_sentiment_influence
-            seven_sentiment_influence_dict[sentiment] = seven_sentiment_influence
+        if start_time and end_time:
+            sent_infl_dict["usr_def_sent_infl_dict"] = usr_def_sent_infl_dict
+        else:
+            sent_infl_dict["tod_sent_infl_dict"] = tod_sent_infl_dict
+            sent_infl_dict["yest_sent_infl_dict"] = yest_sent_infl_dict
+            sent_infl_dict["sev_sent_infl_dict"] = sev_sent_infl_dict
+        return sent_infl_dict
 
-        sentiment_influence_dict["today_sentiment_influence_dict"] = today_sentiment_influence_dict
-        sentiment_influence_dict["yesterday_sentiment_influence_dict"] = yesterday_sentiment_influence_dict
-        sentiment_influence_dict["seven_sentiment_influence_dict"] = seven_sentiment_influence_dict
-        sentiment_influence_dict["user_defined_sentiment_influence_dict"] = user_defined_sentiment_influence_dict
-        return sentiment_influence_dict
-
-    def get_week_influence_change(self, data_source_id_list):
+    def get_week_infl_chg(self, data_sour_id_list):
         """
         本周与上周影响力的对比
-        :param data_source_id_list:
+        :param data_sour_id_list:
         :return:
         """
-        last_week_influence = self.get_news_count(data_source_id_list=data_source_id_list,
-                                                  start_time=self.time_dict["fourteen_ago_time"],
-                                                  end_time=self.time_dict["seven_ago_time"]) * self.influence_scale
-        current_week_influence = self.get_news_count(data_source_id_list=data_source_id_list,
-                                                     start_time=self.time_dict["seven_ago_time"],
-                                                     end_time=self.time_dict["now_time"]) * self.influence_scale
+        last_week_infl = self.get_news_count(data_sour_id_list=data_sour_id_list,
+                                             start_time=self.time_dict["fourteen_ago_time"],
+                                             end_time=self.time_dict["sev_ago_time"]) * self.infl_scale
+        cur_week_infl = self.get_news_count(data_sour_id_list=data_sour_id_list,
+                                            start_time=self.time_dict["sev_ago_time"],
+                                            end_time=self.time_dict["now_time"]) * self.infl_scale
 
-        week_influence_change = (float(current_week_influence) - float(last_week_influence))/float(last_week_influence)
-        week_influence_change = "%.2f" % (week_influence_change * 100) + "%"
-        return week_influence_change
+        week_infl_chg = (float(cur_week_infl) - float(last_week_infl))/float(last_week_infl)
+        week_infl_chg = "%.2f" % (week_infl_chg * 100) + "%"
+        return week_infl_chg
 
-    def get_day_influence_change(self, data_source_id_list):
+    def get_day_infl_chg(self, data_sour_id_list):
         """
         单个数据源的今天与昨天影响力对比
-        :param data_source_id_list:
+        :param data_sour_id_list:
         :return:
         """
 
-        yesterday_influence = self.get_news_count(data_source_id_list=data_source_id_list,
-                                                  start_time=self.time_dict["yesterday_time"],
-                                                  end_time=self.time_dict["today_start_time"]) * self.influence_scale
+        yest_infl = self.get_news_count(data_sour_id_list=data_sour_id_list,
+                                        start_time=self.time_dict["yest_time"],
+                                        end_time=self.time_dict["tod_start_time"]) * self.infl_scale
 
-        today_influence = self.get_news_count(data_source_id_list=data_source_id_list,
-                                              start_time=self.time_dict["today_start_time"],
-                                              end_time=self.time_dict["now_time"]) * self.influence_scale
+        tod_infl = self.get_news_count(data_sour_id_list=data_sour_id_list,
+                                       start_time=self.time_dict["tod_start_time"],
+                                       end_time=self.time_dict["now_time"]) * self.infl_scale
 
-        day_influence_change = (float(today_influence) - float(yesterday_influence))/float(yesterday_influence)
-        day_influence_change = "%.2f" % (day_influence_change * 100) + "%"
-        return day_influence_change
+        day_infl_chg = (float(tod_infl) - float(yest_infl))/float(yest_infl)
+        day_infl_chg = "%.2f" % (day_infl_chg * 100) + "%"
+        return day_infl_chg
 
-    def get_news_objects(self, data_source_id_list, start_time, end_time, sentiment=None):
+    def get_news_objs(self, data_sour_id_list, start_time, end_time, sent=None):
         """
         获得匹配的新闻或文章对象
-        :param data_source_id_list:
+        :param data_sour_id_list:
         :param start_time:
         :param end_time:
-        :param sentiment:
+        :param sent:
         :return:
         """
-        news_objects = self._get_news(data_source_id_list=data_source_id_list,
-                                      start_time=start_time,
-                                      end_time=end_time,
-                                      sentiment=sentiment)['news_objects'].clone()
-        return news_objects
+        news_objs = self._get_news(data_sour_id_list=data_sour_id_list,
+                                   start_time=start_time,
+                                   end_time=end_time,
+                                   sent=sent)['news_objs'].clone()
+        return news_objs
 
-    def get_news_count(self, data_source_id_list, start_time, end_time, sentiment=None):
+    def get_news_count(self, data_sour_id_list, start_time, end_time, sent=None):
         """
         获得相应的新闻或文章的数量
-        :param sentiment:
-        :param data_source_id_list:
+        :param sent:
+        :param data_sour_id_list:
         :param start_time:
         :param end_time:
         :return:
         """
-        news_obj = self._get_news(data_source_id_list,
+        news_obj = self._get_news(data_sour_id_list,
                                   start_time=start_time,
                                   end_time=end_time,
-                                  sentiment=sentiment)["news_objects"]
+                                  sent=sent)["news_objs"]
         news_count = news_obj.count()
         return news_count
 
-    def get_avg_click_repost_read(self, data_source_id_list, start_time, end_time):
-        article_objects = self.get_news_objects(data_source_id_list=data_source_id_list,
-                                                start_time=start_time,
-                                                end_time=end_time)
+    def get_avg_cli_rep_comt_dict(self, data_sour_id_list, start_time, end_time):
+        art_objs = self.get_news_objs(data_sour_id_list=data_sour_id_list,
+                                      start_time=start_time, end_time=end_time)
 
-        article_count = article_objects.count()
-        click_count = 0
-        repost_count = 0
-        avg_click_repost_read_dict = {}
-        for article in article_objects:
-            click_count += article.get("click_count") if article.get("click_count") else 0
-            repost_count += article.get("repost_count") if article.get("repost_count") else 0
+        art_count = art_objs.count()
+        cli_count = 0
+        rep_count = 0
+        comt_count = 0
 
-        if article_count > 0:
-            avg_click_count = float("%.2f" % (float(click_count) / article_count))
-            avg_repost_count = float("%.2f" % (float(repost_count) / article_count))
+        contents = {}
+        for art in art_objs:
+            cli_count += art.get("cli_count") if art.get("cli_count") else 0
+            rep_count += art.get("rep_count") if art.get("rep_count") else 0
+            comt_count += art.get("comt_count") if art.get("comt_count") else 0
+
+        if art_count > 0:
+            avg_cli_count = float("%.2f" % (float(cli_count) / art_count))
+            avg_rep_count = float("%.2f" % (float(rep_count) / art_count))
+            avg_comt_count = float("%.2f" % (float(comt_count) / art_count))
 
         else:
-            avg_click_count = 0
-            avg_repost_count = 0
+            avg_cli_count = 0
+            avg_rep_count = 0
+            avg_comt_count = 0
 
-        avg_click_repost_read_dict["avg_click_count"] = avg_click_count
-        avg_click_repost_read_dict["avg_repost_count"] = avg_repost_count
+        contents["avg_cli_count"] = avg_cli_count
+        contents["avg_rep_count"] = avg_rep_count
+        contents["avg_comt_count"] = avg_comt_count
+        contents["art_count"] = art_count
+        return contents
 
-        return avg_click_repost_read_dict
+    # def get_sent_stas_objs(self, data_sour_id_list, start_time, end_time):
+    #     sent_stas_objs = self.get_sent_stas_objs(data_sour_id_list=data_sour_id_list,
+    #                                              start_time=start_time,
+    #                                              end_time=end_time)
+    #     return sent_stas_objs
 
-    def get_sentiment_statistics_objects(self, data_source_id_list, start_time, end_time):
-        sentiment_statistics_objects = self.get_sentiment_statistics_objects(data_source_id_list=data_source_id_list,
-                                                                             start_time=start_time,
-                                                                             end_time=end_time)
-        return sentiment_statistics_objects
-
-    def get_sort_news_objects(self, data_source_id_list):
+    def get_sort_news_objs(self, data_sour_id_list):
         """
         得到今天按发布时间排序(倒序排列)的对象
-        :param data_source_id_list:
+        :param data_sour_id_list:
         :return:
         """
-        today_news_obj = self._get_news(data_source_id_list=data_source_id_list,
-                                        start_time=self.time_dict["today_start_time"],
-                                        end_time=self.time_dict["now_time"])["news_objects"]
-        seven_news_obj = self._get_news(data_source_id_list=data_source_id_list,
-                                        start_time=self.time_dict["seven_ago_time"],
-                                        end_time=self.time_dict["now_time"])["news_objects"]
+        tod_news_obj = self._get_news(data_sour_id_list=data_sour_id_list,
+                                      start_time=self.time_dict["tod_start_time"],
+                                      end_time=self.time_dict["now_time"])["news_objs"]
+        sev_news_obj = self._get_news(data_sour_id_list=data_sour_id_list,
+                                      start_time=self.time_dict["sev_ago_time"],
+                                      end_time=self.time_dict["now_time"])["news_objs"]
 
-        contents = {"today_sort_news_objects": today_news_obj.sort("-publish_time"),
-                    "seven_sort_news_objects": seven_news_obj.sort("-publish_time")}
+        contents = {
+            "tod_sort_news_objs": tod_news_obj.sort("-publish_time"),
+            "sev_sort_news_objs": sev_news_obj.sort("-publish_time")
+        }
 
         return contents
 
-    def get_hot_media_objects(self, data_source_id_list):
+    def get_hot_med_objs(self, data_sour_id_list):
         """
         7天相关的热门媒体的查找对象新闻或文章数量
-        :param data_source_id_list:
+        :param data_sour_id_list:
         :return:
         """
         if self.__class__.__name__ != "BaiDuZhiDao":
-            hot_media_objects = self._get_news(data_source_id_list,
-                                               start_time=self.time_dict["seven_ago_time"],
-                                               end_time=self.time_dict["now_time"])["hot_media_objects"].clone()
-            return hot_media_objects
+            hot_med_objs = self._get_news(data_sour_id_list,
+                                          start_time=self.time_dict["sev_ago_time"],
+                                          end_time=self.time_dict["now_time"])["hot_med_objs"].clone()
+            return hot_med_objs
 
 
 class BaiDuSearch(BaseSourceMedia):
@@ -244,53 +256,60 @@ class BaiDuSearch(BaseSourceMedia):
     """
     def __init__(self, paras):
         super(BaiDuSearch, self).__init__(paras)
-        self._collection_search_baidu = self._db['search_baidu']
+        self._coll_search_baidu = self._db['search_baidu']
         # 百度搜索的影响力比例
-        self.influence_scale = INFLUENCE_SCALE["baidu_search"]
+        self.infl_scale = INFL_SCALE["baidu_search"]
 
-    def _get_news(self, data_source_id_list, start_time, end_time, sentiment=None):
+    def _get_news(self, data_sour_id_list, start_time, end_time, sent=None):
         """
         新闻影响力和新闻对象
-        :param data_source_id_list:
+        :param data_sour_id_list:
         :param start_time:
         :param end_time:
-        :param sentiment:
+        :param sent:
         :return:
         """
         contents = {}
-        if sentiment:
-            news_objects = self._collection_search_baidu.find({"$or":
-                                                               [{"data_source_id": i} for i in data_source_id_list],
-                                                               "sentiment": sentiment,
-                                                               "publish_time": {"$gte": start_time, "$lte": end_time}})
+        if sent:
+            news_objs = self._coll_search_baidu.find({"$or":
+                                                      [{"data_source_id": i} for i in data_sour_id_list],
+                                                      "sentiment": sent,
+                                                      "publish_time": {"$gte": start_time, "$lte": end_time}})
 
         else:
-            news_objects = self._collection_search_baidu.find({"$or":
-                                                               [{"data_source_id": i} for i in data_source_id_list],
-                                                               "publish_time": {"$gte": start_time, "$lte": end_time}})
+            news_objs = self._coll_search_baidu.find({"$or":
+                                                     [{"data_source_id": i} for i in data_sour_id_list],
+                                                      "publish_time": {"$gte": start_time, "$lte": end_time}},
+                                                     {
+                                                         "_id": 1,
+                                                         "title": 1,
+                                                         "main_body": 1,
+                                                         "publish_time": 1,
+                                                         "data_type": 1,
+                                                         "sentiment": 1,
+                                                         "data_media": 1,
+                                                     })
 
-        contents["news_objects"] = news_objects
+        contents["news_objs"] = news_objs
         return contents
 
-    def get_object(self, obj_id):
-        obj = self._collection_search_baidu.find({"_id": obj_id})
+    def get_obj(self, obj_id):
+        obj = self._coll_search_baidu.find({"_id": obj_id})
         return obj
 
-    def get_hot_media_obj(self, data_source_id_list, start_time, end_time):
-        hot_media_obj = self._collection_search_baidu.find({"$or": [{"data_source_id": i} for i in data_source_id_list],
-                                                            "publish_time": {"$gte": start_time, "$lte": end_time}},
-                                                           {"_id": 0, "media": 1})
-        return hot_media_obj
+    def get_hot_med_obj(self, data_sour_id_list, start_time, end_time):
+        hot_med_obj = self._coll_search_baidu.find({"$or": [{"data_source_id": i} for i in data_sour_id_list],
+                                                    "publish_time": {"$gte": start_time, "$lte": end_time}},
+                                                   {"_id": 0, "med": 1})
+        return hot_med_obj
 
-    def get_sentiment_statistics(self, data_source_id_list, start_time, end_time):
-        sentiment_statistics = self._collection_search_baidu.aggregate([{"$match":
-                                                                        {"publish_time": {"$gte": start_time,
-                                                                                          "$lte": end_time}}},
-                                                                        {"$match": {"$or": [{"data_source_id": i}
-                                                                                    for i in data_source_id_list]}},
-                                                                        {"$group": {"_id": "$sentiment",
-                                                                                    "count": {"$sum": 1}}}])
-        return sentiment_statistics
+    def get_sent_stas(self, data_sour_id_list, start_time, end_time):
+        sent_stas = self._coll_search_baidu.aggregate([{"$match":
+                                                       {"publish_time": {"$gte": start_time, "$lte": end_time}}},
+                                                       {"$match": {"$or": [{"data_source_id": i} 
+                                                                           for i in data_sour_id_list]}},
+                                                       {"$group": {"_id": "$sent", "count": {"$sum": 1}}}])
+        return sent_stas
 
 
 class BaiDuTieBa(BaseSourceMedia):
@@ -299,54 +318,52 @@ class BaiDuTieBa(BaseSourceMedia):
     """
     def __init__(self, paras):
         super(BaiDuTieBa, self).__init__(paras)
-        self._collection_tieba = self._db['tieba']
-        self._collection_tieba_reply = self._db['tieba_reply']
-        self.influence_scale = INFLUENCE_SCALE["baidu_tieba"]
+        self._coll_tieba = self._db['tieba']
+        self._coll_tieba_reply = self._db['tieba_reply']
+        self.infl_scale = INFL_SCALE["baidu_tieba"]
 
-    def _get_news(self, data_source_id_list, start_time, end_time, sentiment=None):
+    def _get_news(self, data_sour_id_list, start_time, end_time, sent=None):
         """
         新闻影响力和新闻对象
-        :param data_source_id_list:
+        :param data_sour_id_list:
         :param start_time:
         :param end_time:
-        :param sentiment:
+        :param sent:
         :return:
         """
         contents = {}
-        if sentiment:
-            news_objects = self._collection_tieba.find({"$or": [{"data_source_id": i} for i in data_source_id_list],
-                                                        "sentiment": sentiment,
-                                                        "publish_time": {"$gte": start_time, "$lte": end_time}})
+        if sent:
+            news_objs = self._coll_tieba.find({"$or": [{"data_source_id": i} for i in data_sour_id_list],
+                                               "sentiment": sent,
+                                               "publish_time": {"$gte": start_time, "$lte": end_time}})
 
         else:
-            news_objects = self._collection_tieba.find({"$or": [{"data_source_id": i} for i in data_source_id_list],
-                                                        "publish_time": {"$gte": start_time, "$lte": end_time}})
+            news_objs = self._coll_tieba.find({"$or": [{"data_source_id": i} for i in data_sour_id_list],
+                                               "publish_time": {"$gte": start_time, "$lte": end_time}})
 
-        contents["news_objects"] = news_objects
+        contents["news_objs"] = news_objs
         return contents
 
-    def get_object(self, obj_id):
-        obj = self._collection_tieba.find({"_id": obj_id})
+    def get_obj(self, obj_id):
+        obj = self._coll_tieba.find({"_id": obj_id})
         return obj
 
     def get_reply_obj(self, url):
-        obj = self._collection_tieba_reply.find({"url": url})
+        obj = self._coll_tieba_reply.find({"url": url})
         return obj
 
-    def get_hot_media_obj(self, data_source_id_list, start_time, end_time):
-        hot_media_obj = self._collection_tieba.find({"$or": [{"data_source_id": i} for i in data_source_id_list],
-                                                    "publish_time": {"$gte": start_time, "$lte": end_time}},
-                                                    {"_id": 0, "author": 1})
-        return hot_media_obj
+    def get_hot_med_obj(self, data_sour_id_list, start_time, end_time):
+        hot_med_obj = self._coll_tieba.find({"$or": [{"data_source_id": i} for i in data_sour_id_list],
+                                            "publish_time": {"$gte": start_time, "$lte": end_time}},
+                                            {"_id": 0, "author": 1})
+        return hot_med_obj
 
-    def get_sentiment_statistics(self, data_source_id_list, start_time, end_time):
-        sentiment_statistics = self._collection_tieba.aggregate([{"$match": {"publish_time": {"$gte": start_time,
-                                                                                              "$lte": end_time}}},
-                                                                {"$match": {"$or": [{"data_source_id": i}
-                                                                                    for i in data_source_id_list]}},
-                                                                {"$group": {"_id": "$sentiment",
-                                                                            "count": {"$sum": 1}}}])
-        return sentiment_statistics
+    def get_sent_stas(self, data_sour_id_list, start_time, end_time):
+        sent_stas = self._coll_tieba.aggregate([{"$match": {"publish_time": {"$gte": start_time, "$lte": end_time}}},
+                                                {"$match": {"$or": [{"data_source_id": i} 
+                                                                    for i in data_sour_id_list]}},
+                                                {"$group": {"_id": "$sent", "count": {"$sum": 1}}}])
+        return sent_stas
 
 
 class BaiDuZhiDao(BaseSourceMedia):
@@ -355,54 +372,52 @@ class BaiDuZhiDao(BaseSourceMedia):
     """
     def __init__(self, paras):
         super(BaiDuZhiDao, self).__init__(paras)
-        self._collection_zhidao = self._db['zhidao']
-        self._collection_zhidao_reply = self._db['zhidao_reply']
-        self.influence_scale = INFLUENCE_SCALE["baidu_zhidao"]
+        self._coll_zhidao = self._db['zhidao']
+        self._coll_zhidao_reply = self._db['zhidao_reply']
+        self.infl_scale = INFL_SCALE["baidu_zhidao"]
 
-    def _get_news(self, data_source_id_list, start_time, end_time, sentiment=None):
+    def _get_news(self, data_sour_id_list, start_time, end_time, sent=None):
         """
         新闻影响力和新闻对象
-        :param data_source_id_list:
+        :param data_sour_id_list:
         :param start_time:
         :param end_time:
-        :param sentiment:
+        :param sent:
         :return:
         """
         contents = {}
-        if sentiment:
-            news_objects = self._collection_zhidao.find({"$or": [{"data_source_id": i} for i in data_source_id_list],
-                                                         "sentiment": sentiment,
-                                                         "publish_time": {"$gte": start_time, "$lte": end_time}})
+        if sent:
+            news_objs = self._coll_zhidao.find({"$or": [{"data_source_id": i} for i in data_sour_id_list],
+                                                "sentiment": sent,
+                                                "publish_time": {"$gte": start_time, "$lte": end_time}})
 
         else:
-            news_objects = self._collection_zhidao.find({"$or": [{"data_source_id": i} for i in data_source_id_list],
-                                                         "publish_time": {"$gte": start_time, "$lte": end_time}})
+            news_objs = self._coll_zhidao.find({"$or": [{"data_source_id": i} for i in data_sour_id_list],
+                                                "publish_time": {"$gte": start_time, "$lte": end_time}})
 
-        contents["news_objects"] = news_objects
+        contents["news_objs"] = news_objs
         return contents
 
-    def get_object(self, obj_id):
-        obj = self._collection_zhidao.find({"_id": obj_id})
+    def get_obj(self, obj_id):
+        obj = self._coll_zhidao.find({"_id": obj_id})
         return obj
 
     def get_reply_obj(self, url):
-        obj = self._collection_zhidao_reply.find({"url": url})
+        obj = self._coll_zhidao_reply.find({"url": url})
         return obj
 
-    def get_hot_media_obj(self, data_source_id_list, start_time, end_time):
-        hot_media_obj = self._collection_zhidao.find({"$or": [{"data_source_id": i} for i in data_source_id_list],
-                                                     "publish_time": {"$gte": start_time, "$lte": end_time}},
-                                                     {"_id": 0, "media": 1})
-        return hot_media_obj
+    def get_hot_med_obj(self, data_sour_id_list, start_time, end_time):
+        hot_med_obj = self._coll_zhidao.find({"$or": [{"data_source_id": i} for i in data_sour_id_list],
+                                             "publish_time": {"$gte": start_time, "$lte": end_time}},
+                                             {"_id": 0, "med": 1})
+        return hot_med_obj
 
-    def get_sentiment_statistics(self, data_source_id_list, start_time, end_time):
-        sentiment_statistics = self._collection_zhidao.aggregate([{"$match": {"publish_time": {"$gte": start_time,
-                                                                                               "$lte": end_time}}},
-                                                                 {"$match": {"$or": [{"data_source_id": i}
-                                                                                     for i in data_source_id_list]}},
-                                                                  {"$group": {"_id": "$sentiment",
-                                                                              "count": {"$sum": 1}}}])
-        return sentiment_statistics
+    def get_sent_stas(self, data_sour_id_list, start_time, end_time):
+        sent_stas = self._coll_zhidao.aggregate([{"$match": {"publish_time": {"$gte": start_time, "$lte": end_time}}},
+                                                 {"$match": {"$or": [{"data_source_id": i}
+                                                                     for i in data_sour_id_list]}},
+                                                 {"$group": {"_id": "$sent", "count": {"$sum": 1}}}])
+        return sent_stas
 
 
 class WeiBo(BaseSourceMedia):
@@ -411,76 +426,68 @@ class WeiBo(BaseSourceMedia):
     """
     def __init__(self, paras):
         super(WeiBo, self).__init__(paras)
-        self._collection_search_weibo = self._db['search_weibo']
-        self._collection_weibo_comment = self._db['weibo_comment']
-        self._collection_search_weibo_id = self._db['search_weibo_id']
-        self.influence_scale = INFLUENCE_SCALE["weibo"]
+        self._coll_search_weibo = self._db['search_weibo']
+        self._coll_weibo_comt = self._db['weibo_comment']
+        self._coll_search_weibo_id = self._db['search_weibo_id']
+        self.infl_scale = INFL_SCALE["weibo"]
 
-    def _get_news(self, data_source_id_list, start_time, end_time, sentiment=None):
+    def _get_news(self, data_sour_id_list, start_time, end_time, sent=None):
         """
         新闻影响力和新闻或文章对象
-        :param data_source_id_list:
+        :param data_sour_id_list:
         :param start_time:
         :param end_time:
-        :param sentiment:
+        :param sent:
         :return:
         """
         contents = {}
-        if sentiment:
-            news_objects = self._collection_search_weibo.find({"$or":
-                                                               [{"data_source_id": i} for i in data_source_id_list],
-                                                               "sentiment": sentiment,
-                                                               "publish_time": {"$gte": start_time, "$lte": end_time}})
+        if sent:
+            news_objs = self._coll_search_weibo.find({"$or":
+                                                     [{"data_source_id": i} for i in data_sour_id_list],
+                                                      "sentiment": sent,
+                                                      "publish_time": {"$gte": start_time, "$lte": end_time}})
 
         else:
-            news_objects = self._collection_search_weibo.find({"$or":
-                                                               [{"data_source_id": i} for i in data_source_id_list],
-                                                               "publish_time": {"$gte": start_time, "$lte": end_time}})
+            news_objs = self._coll_search_weibo.find({"$or":
+                                                     [{"data_source_id": i} for i in data_sour_id_list],
+                                                     "publish_time": {"$gte": start_time, "$lte": end_time}})
 
-        contents["news_objects"] = news_objects
+        contents["news_objs"] = news_objs
         return contents
 
-    def get_weibo_comment_location(self, data_source_id_list):
-        start_time = self.time_dict["seven_ago_time"]
+    def get_weibo_comt_loc(self, data_sour_id_list):
+        start_time = self.time_dict["sev_ago_time"]
         end_time = self.time_dict["now_time"]
 
-        weibo_comment_location_objects = self._collection_weibo_comment.find({"$or":
-                                                                             [{"data_source_id": i}
-                                                                              for i in data_source_id_list],
-                                                                              "comment_time": {
-                                                                                "$gte": start_time, "$lte": end_time}},
-                                                                             {"_id": 0, "country": 1,
-                                                                              "zone": 1, "city": 1})
-        return weibo_comment_location_objects
+        weibo_comt_loc_objs = self._coll_weibo_comt.find({"$or": [{"data_source_id": i} for i in data_sour_id_list],
+                                                          "comment_time": {"$gte": start_time, "$lte": end_time}},
+                                                         {"_id": 0, "country": 1, "zone": 1, "city": 1})
+        return weibo_comt_loc_objs
 
-    def get_search_weibo_id_info(self, data_source_id_list):
+    def get_search_weibo_id_info(self, data_sour_id_list):
         pass
 
-    def get_object(self, obj_id):
-        obj = self._collection_search_weibo.find({"_id": obj_id})
+    def get_obj(self, obj_id):
+        obj = self._coll_search_weibo.find({"_id": obj_id})
         return obj
 
-    def get_comment_obj(self, weibo_id):
-        obj = self._collection_weibo_comment.find({"weibo_id": weibo_id})
+    def get_comt_obj(self, weibo_id):
+        obj = self._coll_weibo_comt.find({"weibo_id": weibo_id})
         return obj
 
-    def get_hot_media_obj(self, data_source_id_list, start_time, end_time):
-        hot_media_obj = self._collection_search_weibo.find({"$or": [{"data_source_id": i} for i in data_source_id_list],
-                                                            "publish_time":
-                                                                {"$gte": start_time, "$lte": end_time}},
-                                                           {"_id": 0, "media": 1})
-        return hot_media_obj
+    def get_hot_med_obj(self, data_sour_id_list, start_time, end_time):
+        hot_med_obj = self._coll_search_weibo.find({"$or": [{"data_source_id": i} for i in data_sour_id_list],
+                                                    "publish_time": {"$gte": start_time, "$lte": end_time}},
+                                                   {"_id": 0, "med": 1})
+        return hot_med_obj
 
-    def get_sentiment_statistics(self, data_source_id_list, start_time, end_time):
-        sentiment_statistics = self._collection_search_weibo.aggregate([{"$match": {"publish_time":
-                                                                                    {"$gte": start_time,
-                                                                                     "$lte": end_time}}},
-                                                                        {"$match": {"$or": [{"data_source_id": i}
-                                                                                    for i in data_source_id_list]}},
-                                                                        {"$group":
-                                                                        {"_id": "$sentiment",
-                                                                         "count": {"$sum": 1}}}])
-        return sentiment_statistics
+    def get_sent_stas(self, data_sour_id_list, start_time, end_time):
+        sent_stas = self._coll_search_weibo.aggregate([{"$match": {"publish_time": {"$gte": start_time,
+                                                                                    "$lte": end_time}}},
+                                                       {"$match": {"$or": [{"data_source_id": i}
+                                                                           for i in data_sour_id_list]}},
+                                                       {"$group": {"_id": "$sent", "count": {"$sum": 1}}}])
+        return sent_stas
 
 
 class WeiXin(BaseSourceMedia):
@@ -489,57 +496,51 @@ class WeiXin(BaseSourceMedia):
     """
     def __init__(self, paras):
         super(WeiXin, self).__init__(paras)
-        self._collection_weixin_article = self._db['weixin_article']
-        self._collection_weixin_id_info = self._db['weixin_id_info']
-        self.influence_scale = INFLUENCE_SCALE["weixin"]
+        self._coll_weixin_art = self._db['weixin_article']
+        self._coll_weixin_id_info = self._db['weixin_id_info']
+        self.infl_scale = INFL_SCALE["weixin"]
 
-    def _get_news(self, data_source_id_list, start_time, end_time, sentiment=None):
+    def _get_news(self, data_sour_id_list, start_time, end_time, sent=None):
         """
         新闻影响力和新闻或文章对象
-        :param data_source_id_list:
+        :param data_sour_id_list:
         :param start_time:
         :param end_time:
-        :param sentiment:
+        :param sent:
         :return:
         """
         contents = {}
-        if sentiment:
-            news_objects = self._collection_weixin_article.find({"$or":
-                                                                 [{"data_source_id": i} for i in data_source_id_list],
-                                                                 "sentiment": sentiment,
-                                                                 "publish_time": {"$gte": start_time,
-                                                                                  "$lte": end_time}})
+        if sent:
+            news_objs = self._coll_weixin_art.find({"$or": [{"data_source_id": i} for i in data_sour_id_list],
+                                                    "sentiment": sent,
+                                                    "publish_time": {"$gte": start_time, "$lte": end_time}})
 
         else:
-            news_objects = self._collection_weixin_article.find({"$or":
-                                                                 [{"data_source_id": i} for i in data_source_id_list],
-                                                                 "publish_time": {"$gte": start_time,
-                                                                                  "$lte": end_time}})
+            news_objs = self._coll_weixin_art.find({"$or": [{"data_source_id": i} for i in data_sour_id_list],
+                                                    "publish_time": {"$gte": start_time, "$lte": end_time}})
 
-        contents["news_objects"] = news_objects
+        contents["news_objs"] = news_objs
         return contents
 
-    def get_object(self, obj_id):
-        obj = self._collection_weixin_article.find({"_id": obj_id})
+    def get_obj(self, obj_id):
+        obj = self._coll_weixin_art.find({"_id": obj_id})
         return obj
 
-    def get_hot_media_obj(self, data_source_id_list, start_time, end_time):
-        hot_media_obj = self._collection_weixin_article.find({"$or":
-                                                             [{"data_source_id": i} for i in data_source_id_list],
-                                                             "publish_time":
-                                                                 {"$gte": start_time, "$lte": end_time}},
-                                                             {"_id": 0, "media": 1})
-        return hot_media_obj
+    def get_hot_med_obj(self, data_sour_id_list, start_time, end_time):
+        hot_med_obj = self._coll_weixin_art.find({"$or": [{"data_source_id": i} for i in data_sour_id_list],
+                                                  "publish_time": {"$gte": start_time, "$lte": end_time}},
+                                                 {"_id": 0, "med": 1})
+        return hot_med_obj
 
-    def get_sentiment_statistics(self, data_source_id_list, start_time, end_time):
-        sentiment_statistics = self._collection_weixin_article.aggregate([{"$match":
-                                                                         {"publish_time": {"$gte": start_time,
-                                                                                           "$lte": end_time}}},
-                                                                         {"$match": {"$or": [{"data_source_id": i}
-                                                                                     for i in data_source_id_list]}},
-                                                                         {"$group": {"_id": "$sentiment",
-                                                                                     "count": {"$sum": 1}}}])
-        return sentiment_statistics
+    def get_sent_stas(self, data_sour_id_list, start_time, end_time):
+        sent_stas = self._coll_weixin_art.aggregate([{"$match":
+                                                     {"publish_time": {"$gte": start_time,
+                                                                       "$lte": end_time}}},
+                                                     {"$match": {"$or": [{"data_source_id": i}
+                                                                 for i in data_sour_id_list]}},
+                                                     {"$group": {"_id": "$sent",
+                                                                 "count": {"$sum": 1}}}])
+        return sent_stas
 
 
 class ZhiHu(BaseSourceMedia):
@@ -548,52 +549,47 @@ class ZhiHu(BaseSourceMedia):
     """
     def __init__(self, paras):
         super(ZhiHu, self).__init__(paras)
-        self._collection_zhihu = self._db['zhihu']
-        self.influence_scale = INFLUENCE_SCALE["zhihu"]
+        self._coll_zhihu = self._db['zhihu']
+        self.infl_scale = INFL_SCALE["zhihu"]
 
-    def _get_news(self, data_source_id_list, start_time, end_time, sentiment=None):
+    def _get_news(self, data_sour_id_list, start_time, end_time, sent=None):
         """
         新闻影响力和新闻或文章对象
-        :param data_source_id_list:
+        :param data_sour_id_list:
         :param start_time:
         :param end_time:
-        :param sentiment:
+        :param sent:
         :return:
         """
         contents = {}
-        if sentiment:
-            news_objects = self._collection_zhihu.find({"$or":
-                                                        [{"data_source_id": i} for i in data_source_id_list],
-                                                        "sentiment": sentiment,
-                                                        "publish_time": {"$gte": start_time, "$lte": end_time}})
+        if sent:
+            news_objs = self._coll_zhihu.find({"$or": [{"data_source_id": i} for i in data_sour_id_list],
+                                               "sentiment": sent,
+                                               "publish_time": {"$gte": start_time, "$lte": end_time}})
 
         else:
-            news_objects = self._collection_zhihu.find({"$or":
-                                                        [{"data_source_id": i} for i in data_source_id_list],
-                                                        "publish_time": {"$gte": start_time, "$lte": end_time}})
+            news_objs = self._coll_zhihu.find({"$or": [{"data_source_id": i} for i in data_sour_id_list],
+                                               "publish_time": {"$gte": start_time, "$lte": end_time}})
 
-        contents["news_objects"] = news_objects
+        contents["news_objs"] = news_objs
         return contents
 
-    def get_object(self, obj_id):
-        obj = self._collection_zhihu.find({"_id": obj_id})
+    def get_obj(self, obj_id):
+        obj = self._coll_zhihu.find({"_id": obj_id})
         return obj
 
-    def get_hot_media_obj(self, data_source_id_list, start_time, end_time):
-        hot_media_obj = self._collection_zhihu.find({"$or": [{"data_source_id": i} for i in data_source_id_list],
-                                                     "publish_time":
-                                                         {"$gte": start_time, "$lte": end_time}},
-                                                    {"_id": 0, "media": 1})
-        return hot_media_obj
+    def get_hot_med_obj(self, data_sour_id_list, start_time, end_time):
+        hot_med_obj = self._coll_zhihu.find({"$or": [{"data_source_id": i} for i in data_sour_id_list],
+                                             "publish_time": {"$gte": start_time, "$lte": end_time}},
+                                            {"_id": 0, "med": 1})
+        return hot_med_obj
 
-    def get_sentiment_statistics(self, data_source_id_list, start_time, end_time):
-        sentiment_statistics = self._collection_zhihu.aggregate([{"$match": {"publish_time": {"$gte": start_time,
-                                                                                              "$lte": end_time}}},
-                                                                {"$match": {"$or": [{"data_source_id": i}
-                                                                                    for i in data_source_id_list]}},
-                                                                {"$group": {"_id": "$sentiment",
-                                                                            "count": {"$sum": 1}}}])
-        return sentiment_statistics
+    def get_sent_stas(self, data_sour_id_list, start_time, end_time):
+        sent_stas = self._coll_zhihu.aggregate([{"$match": {"publish_time": {"$gte": start_time, "$lte": end_time}}},
+                                                {"$match": {"$or": [{"data_source_id": i}
+                                                                    for i in data_sour_id_list]}},
+                                                {"$group": {"_id": "$sent", "count": {"$sum": 1}}}])
+        return sent_stas
 
 
 class AppStore(object):
@@ -601,85 +597,81 @@ class AppStore(object):
     苹果应用商店
     """
     def __init__(self, paras):
-        self._db = get_mongodb_client(paras)['sem_test']
+        self._db = get_mongodb_client(paras)[DB]
         self.time_dict = get_time()
-        self._collection_app_comments = self._db['app_comments']
-        self._collection_app_detail = self._db['app_detail']
-        self._collection_app_bangdan = self._db['app_bangdan']
+        self._coll_app_comts = self._db['app_comments']
+        self._coll_app_det = self._db['app_detail']
+        self._coll_app_bd = self._db['app_bangdan']
 
-    def get_app_comments_info(self, data_source_id_list):
+    def get_app_comts_info(self, data_sour_id_list):
         """
         新闻影响力和新闻对象
-        :param data_source_id_list:
+        :param data_sour_id_list:
         :return:
         """
-        app_comments_info = {}
-        comments_objects = self._collection_app_comments.find({"$or":
-                                                              [{"data_source_id": i} for i in data_source_id_list]})
-        # comments_objects = self._collection_app_comments.find({"appid": "938688461"})
-        # dif_sentiment_count = self._collection_app_comments.aggregate(
-        #     [{"$group": {"_id": "$sentiment", "count": {"$sum": 1}}}])
-        sentiment_count_dict = {"negative_count": 0, "positive_count": 0, "neutral_count": 0}
-        sentiment_obj_dict = {"negative_obj": [], "positive_obj": [], "neutral_obj": []}
+        app_comts_info = {}
+        comts_objs = self._coll_app_comts.find({"$or": [{"data_source_id": i} for i in data_sour_id_list]})
+        # dif_sent_count = self._coll_app_comts.aggregate(
+        #     [{"$group": {"_id": "$sent", "count": {"$sum": 1}}}])
+        sent_count_dict = {"neg_count": 0, "pos_count": 0, "neu_count": 0}
+        sent_obj_dict = {"neg_obj": [], "pos_obj": [], "neu_obj": []}
         rating_count_dict = {"1星": 0, "2星": 0, "3星": 0, "4星": 0, "5星": 0}
         rating_obj_dict = {"1星": [], "2星": [], "3星": [], "4星": [], "5星": []}
-        sort_comments_objects = comments_objects.sort("-publish_time").limit(100)
-        for obj in sort_comments_objects:
+        sort_comts_objs = comts_objs.sort("-publish_time").limit(100)
+        for obj in sort_comts_objs:
             # 不同情感值评论的数量
-            sentiment = obj.get("comment_sentiment") if obj.get("comment_sentiment") else 0
-            if sentiment == "negative":
-                sentiment_count_dict["negative_count"] += 1
-                sentiment_obj_dict["negative_obj"].append(serialize_news_obj(obj))
-            elif sentiment == "positive":
-                sentiment_count_dict["positive_count"] += 1
-                sentiment_obj_dict["positive_obj"].append(serialize_news_obj(obj))
-            elif sentiment == "neutral":
-                sentiment_count_dict["neutral_count"] += 1
-                sentiment_obj_dict["neutral_obj"].append(serialize_news_obj(obj))
+            sent = obj.get("comt_sent") if obj.get("comt_sent") else 0
+            if sent == "negative":
+                sent_count_dict["neg_count"] += 1
+                sent_obj_dict["neg_obj"].append(seria_news_obj(obj))
+            elif sent == "positive":
+                sent_count_dict["pos_count"] += 1
+                sent_obj_dict["pos_obj"].append(seria_news_obj(obj))
+            elif sent == "neutral":
+                sent_count_dict["neu_count"] += 1
+                sent_obj_dict["neu_obj"].append(seria_news_obj(obj))
 
             # 不同评分的评论的数量
             if obj["rating"] == 1:
                 rating_count_dict["1星"] += 1
-                rating_obj_dict["1星"].append(serialize_news_obj(obj))
+                rating_obj_dict["1星"].append(seria_news_obj(obj))
             elif obj["rating"] == 2:
                 rating_count_dict["2星"] += 1
-                rating_obj_dict["2星"].append(serialize_news_obj(obj))
+                rating_obj_dict["2星"].append(seria_news_obj(obj))
             elif obj["rating"] == 3:
                 rating_count_dict["3星"] += 1
-                rating_obj_dict["3星"].append(serialize_news_obj(obj))
+                rating_obj_dict["3星"].append(seria_news_obj(obj))
             elif obj["rating"] == 4:
                 rating_count_dict["4星"] += 1
-                rating_obj_dict["4星"].append(serialize_news_obj(obj))
+                rating_obj_dict["4星"].append(seria_news_obj(obj))
             elif obj["rating"] == 5:
                 rating_count_dict["5星"] += 1
-                rating_obj_dict["5星"].append(serialize_news_obj(obj))
+                rating_obj_dict["5星"].append(seria_news_obj(obj))
 
-        app_comments_info["sort_comments_objects"] = serialize_news_obj(sort_comments_objects.clone())
-        app_comments_info["sentiment_count_dict"] = sentiment_count_dict
-        app_comments_info["rating_count_dict"] = rating_count_dict
-        app_comments_info["sentiment_obj_dict"] = sentiment_obj_dict
-        app_comments_info["rating_obj_dict"] = rating_obj_dict
-        return app_comments_info
+        app_comts_info["sort_comts_objs"] = seria_news_obj(sort_comts_objs.clone())
+        app_comts_info["sent_count_dict"] = sent_count_dict
+        app_comts_info["rating_count_dict"] = rating_count_dict
+        app_comts_info["sent_obj_dict"] = sent_obj_dict
+        app_comts_info["rating_obj_dict"] = rating_obj_dict
+        return app_comts_info
 
-    def get_app_bangdan_info_obj(self, data_source_id_list):
+    def get_app_bd_info_obj(self, data_sour_id_list):
         """
-        得到app榜单collection中的数据
-        :param data_source_id_list:
+        得到app榜单coll中的数据
+        :param data_sour_id_list:
         :return:
         """
-        app_bangdan_info_obj = self._collection_app_bangdan.find({"$or":
-                                                                 [{"data_source_id": i} for i in data_source_id_list]})
-        return serialize_news_obj(app_bangdan_info_obj)
+        app_bd_info_obj = self._coll_app_bd.find({"$or": [{"data_source_id": i} for i in data_sour_id_list]})
+        return seria_news_obj(app_bd_info_obj)
 
-    def get_app_detail_obj(self, data_source_id_list):
+    def get_app_det_obj(self, data_sour_id_list):
         """
-        得到app详情collection中的数据
-        :param data_source_id_list:
+        得到app详情coll中的数据
+        :param data_sour_id_list:
         :return:
         """
-        app_detail_obj = self._collection_app_detail.find({"$or":
-                                                          [{"data_source_id": i} for i in data_source_id_list]})
-        return serialize_news_obj(app_detail_obj)
+        app_det_obj = self._coll_app_det.find({"$or": [{"data_source_id": i} for i in data_sour_id_list]})
+        return seria_news_obj(app_det_obj)
 
 
 if __name__ == "__main__":
