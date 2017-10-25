@@ -26,7 +26,7 @@ def inform_list(request):
     get_sort_news_objs_list = mongo_data.get_sort_news_objs_list(data_sour_id_list,
                                                                  paras=settings.MONGO_PARA,
                                                                  start_time=start_time,
-                                                                 end_time=end_time)
+                                                                 end_time=end_time)[:10]
     contents = {"get_sort_news_objs_list": get_sort_news_objs_list}
     return JsonResponse(contents)
 
@@ -38,11 +38,11 @@ def inform_det(request):
     :return:
     """
     med_sour = request.POST.get("med_sour", "baidu_tieba")
-    inform_id = request.POST.get("inform_id", "59dc7724286fd49c3ed77ed6")
+    inform_id = request.POST.get("inform_id", "59f02919b47f72b9f03778f6")
 
     contents = {}
     sour_med_ins_dict = mongo_data.get_sour_med_ins_dict(paras=settings.MONGO_PARA)
-    inform_obj = sour_med_ins_dict[med_sour].get_object(ObjectId(inform_id))
+    inform_obj = sour_med_ins_dict[med_sour].get_obj(ObjectId(inform_id))
 
     if med_sour == "weibo":
         weibo_id = [obj.get("weibo_id") for obj in inform_obj][0]
@@ -64,8 +64,7 @@ def inform_det(request):
         pass
 
     if med_sour == "baidu_tieba":
-        # url = [obj.get("url") for obj in inform_obj][0]
-        url = "http://tieba.baidu.com/p/5152644693?pid=107902501395&cid=0"
+        url = [obj.get("url") for obj in inform_obj][0]
         reply_obj = sour_med_ins_dict[med_sour].get_reply_obj(url)
         reply_obj_list = [common.seria_news_obj(obj) for obj in reply_obj if obj.get("building_no") > 1]
 

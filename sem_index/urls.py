@@ -3,12 +3,12 @@ from django.conf.urls import url
 from sem_index import views
 
 urlpatterns = [
-    url(r'^influence_show/(\d*?)/$', views.influence_show, name="influence_show"),
+    url(r'^infl_show/(\d*?)/$', views.infl_show, name="infl_show"),
     url(r'^search_exponent/$', views.search_exponent, name="search_exponent"),
-    url(r'^influence_directive/(\d*?)/$', views.influence_directive, name="influence_directive"),
-    url(r'^today_sem/(\d*?)/$', views.today_sem, name="today_sem"),
-    url(r'^today_hot/(\d*?)/$', views.today_hot, name="today_hot"),
-    url(r'^today_information/(\d*?)/$', views.today_information, name="toady_information"),
+    url(r'^infl_dire/(\d*?)/$', views.infl_dire, name="infl_dire"),
+    url(r'^tod_sem/(\d*?)/$', views.tod_sem, name="tod_sem"),
+    url(r'^tod_hot/(\d*?)/$', views.tod_hot, name="tod_hot"),
+    url(r'^tod_inform/(\d*?)/$', views.tod_inform, name="tod_inform"),
     url(r'^weibo/(\d*?)/$', views.weibo, name="weibo"),
     url(r'^baidu_zhidao/(\d*?)/$', views.baidu_zhidao, name="baidu_zhidao"),
     url(r'^app_info/(\d*?)/$', views.app_info, name="app_info"),

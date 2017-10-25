@@ -6,7 +6,9 @@ import logging
 from collections import Counter
 
 
-MONGO_PARA = "mongodb://access_mongo:donewsusemongodbby20170222@slave07:27017/admin?readPreference=secondaryPreferred"
+# MONGO_PARA = "mongodb://access_mongo:donewsusemongodbby20170222@slave07:27017/admin?readPreference=secondaryPreferred"
+MONGO_PARA = "mongodb://localhost:27017"
+
 DB = "sem_test"
 
 INFL_SCALE = {
@@ -52,7 +54,8 @@ def get_mongodb_client(paras):
 
 if __name__ == "__main__":
     client = get_mongodb_client(MONGO_PARA)
-    db = client["sem_test"]
+    print client.database_names()
+    # db = client["sem_test"]
     # obj = db["search_weibo"].find({"data_sour_id": 2}).sort("-publish_time")
     # obj1 = db["search_weibo"].find({"data_sour_id": 2,
     #                                "publish_time": {"$gte": "2017-01-03 19:00:00",
@@ -70,13 +73,13 @@ if __name__ == "__main__":
     # print temp_dict
     # print type(result)
 
-    result = db["search_baidu"].aggregate([
-                                     {"$match": {"$or": [{"data_sour_id": i} for i in [1, 2, 3]]}},
-                                                                  {"$group": {"_id": "$sentiment",
-                                                                              "count": {"$sum": 1}}}])
-
-    for i in result:
-        print i
-
-    count = db["search_baidu"].find({}).count()
-    print count
+    # result = db["search_baidu"].aggregate([
+    #                                  {"$match": {"$or": [{"data_sour_id": i} for i in [1, 2, 3]]}},
+    #                                                               {"$group": {"_id": "$sentiment",
+    #                                                                           "count": {"$sum": 1}}}])
+    #
+    # for i in result:
+    #     print i
+    #
+    # count = db["search_baidu"].find({}).count()
+    # print count

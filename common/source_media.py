@@ -38,7 +38,7 @@ class BaseSourceMedia(object):
             usr_def_infl = self.get_news_count(data_sour_id_list=data_sour_id_list,
                                                start_time=start_time,
                                                end_time=end_time) * self.infl_scale
-            infl_dict["usr_def_infl"] = usr_def_infl
+            infl_dict["usr_def_infl"] = round(usr_def_infl, 2)
         else:
             sev_infl = self.get_news_count(data_sour_id_list=data_sour_id_list,
                                            start_time=self.time_dict["sev_ago_time"],
@@ -56,10 +56,10 @@ class BaseSourceMedia(object):
                                             start_time=self.time_dict["yest_time"],
                                             end_time=self.time_dict["tod_start_time"]) * self.infl_scale
 
-            infl_dict["sev_infl"] = sev_infl
-            infl_dict["last_sev_infl"] = last_sev_infl
-            infl_dict["tod_infl"] = tod_infl
-            infl_dict["yest_infl"] = yest_infl
+            infl_dict["sev_infl"] = round(sev_infl, 2)
+            infl_dict["last_sev_infl"] = round(last_sev_infl, 2)
+            infl_dict["tod_infl"] = round(tod_infl, 2)
+            infl_dict["yest_infl"] = round(yest_infl, 2)
 
         return infl_dict
 
@@ -84,7 +84,7 @@ class BaseSourceMedia(object):
                                                         start_time=start_time,
                                                         end_time=end_time,
                                                         sent=sent) * self.infl_scale
-                usr_def_sent_infl_dict[sent] = usr_def_sent_infl
+                usr_def_sent_infl_dict[sent] = round(usr_def_sent_infl, 2)
             else:
                 tod_sent_infl = self.get_news_count(data_sour_id_list=data_sour_id_list,
                                                     start_time=self.time_dict["tod_start_time"],
@@ -101,9 +101,9 @@ class BaseSourceMedia(object):
                                                     end_time=self.time_dict["now_time"],
                                                     sent=sent) * self.infl_scale
 
-                tod_sent_infl_dict[sent] = tod_sent_infl
-                yest_sent_infl_dict[sent] = yest_sent_infl
-                sev_sent_infl_dict[sent] = sev_sent_infl
+                tod_sent_infl_dict[sent] = round(tod_sent_infl, 2)
+                yest_sent_infl_dict[sent] = round(yest_sent_infl, 2)
+                sev_sent_infl_dict[sent] = round(sev_sent_infl, 2)
 
         if start_time and end_time:
             sent_infl_dict["usr_def_sent_infl_dict"] = usr_def_sent_infl_dict
@@ -191,9 +191,9 @@ class BaseSourceMedia(object):
 
         contents = {}
         for art in art_objs:
-            cli_count += art.get("cli_count") if art.get("cli_count") else 0
-            rep_count += art.get("rep_count") if art.get("rep_count") else 0
-            comt_count += art.get("comt_count") if art.get("comt_count") else 0
+            cli_count += art.get("click_count") if art.get("click_count") else 0
+            rep_count += art.get("repost_count") if art.get("repost_count") else 0
+            comt_count += art.get("comment_count") if art.get("comment_count") else 0
 
         if art_count > 0:
             avg_cli_count = float("%.2f" % (float(cli_count) / art_count))
@@ -308,7 +308,7 @@ class BaiDuSearch(BaseSourceMedia):
                                                        {"publish_time": {"$gte": start_time, "$lte": end_time}}},
                                                        {"$match": {"$or": [{"data_source_id": i} 
                                                                            for i in data_sour_id_list]}},
-                                                       {"$group": {"_id": "$sent", "count": {"$sum": 1}}}])
+                                                       {"$group": {"_id": "$sentiment", "count": {"$sum": 1}}}])
         return sent_stas
 
 
@@ -339,7 +339,16 @@ class BaiDuTieBa(BaseSourceMedia):
 
         else:
             news_objs = self._coll_tieba.find({"$or": [{"data_source_id": i} for i in data_sour_id_list],
-                                               "publish_time": {"$gte": start_time, "$lte": end_time}})
+                                               "publish_time": {"$gte": start_time, "$lte": end_time}},
+                                              {
+                                                  "_id": 1,
+                                                  "title": 1,
+                                                  "main_body": 1,
+                                                  "publish_time": 1,
+                                                  "data_type": 1,
+                                                  "sentiment": 1,
+                                                  "data_media": 1,
+                                              })
 
         contents["news_objs"] = news_objs
         return contents
@@ -362,7 +371,7 @@ class BaiDuTieBa(BaseSourceMedia):
         sent_stas = self._coll_tieba.aggregate([{"$match": {"publish_time": {"$gte": start_time, "$lte": end_time}}},
                                                 {"$match": {"$or": [{"data_source_id": i} 
                                                                     for i in data_sour_id_list]}},
-                                                {"$group": {"_id": "$sent", "count": {"$sum": 1}}}])
+                                                {"$group": {"_id": "$sentiment", "count": {"$sum": 1}}}])
         return sent_stas
 
 
@@ -393,7 +402,16 @@ class BaiDuZhiDao(BaseSourceMedia):
 
         else:
             news_objs = self._coll_zhidao.find({"$or": [{"data_source_id": i} for i in data_sour_id_list],
-                                                "publish_time": {"$gte": start_time, "$lte": end_time}})
+                                                "publish_time": {"$gte": start_time, "$lte": end_time}},
+                                               {
+                                                   "_id": 1,
+                                                   "title": 1,
+                                                   "main_body": 1,
+                                                   "publish_time": 1,
+                                                   "data_type": 1,
+                                                   "sentiment": 1,
+                                                   "data_media": 1,
+                                               })
 
         contents["news_objs"] = news_objs
         return contents
@@ -416,7 +434,7 @@ class BaiDuZhiDao(BaseSourceMedia):
         sent_stas = self._coll_zhidao.aggregate([{"$match": {"publish_time": {"$gte": start_time, "$lte": end_time}}},
                                                  {"$match": {"$or": [{"data_source_id": i}
                                                                      for i in data_sour_id_list]}},
-                                                 {"$group": {"_id": "$sent", "count": {"$sum": 1}}}])
+                                                 {"$group": {"_id": "$sentiment", "count": {"$sum": 1}}}])
         return sent_stas
 
 
@@ -450,15 +468,24 @@ class WeiBo(BaseSourceMedia):
         else:
             news_objs = self._coll_search_weibo.find({"$or":
                                                      [{"data_source_id": i} for i in data_sour_id_list],
-                                                     "publish_time": {"$gte": start_time, "$lte": end_time}})
+                                                     "publish_time": {"$gte": start_time, "$lte": end_time}},
+                                                     {
+                                                         "_id": 1,
+                                                         "title": 1,
+                                                         "main_body": 1,
+                                                         "publish_time": 1,
+                                                         "data_type": 1,
+                                                         "sentiment": 1,
+                                                         "data_media": 1,
+                                                         "click_count": 1,
+                                                         "repost_count": 1,
+                                                         "comment_count": 1,
+                                                     })
 
         contents["news_objs"] = news_objs
         return contents
 
-    def get_weibo_comt_loc(self, data_sour_id_list):
-        start_time = self.time_dict["sev_ago_time"]
-        end_time = self.time_dict["now_time"]
-
+    def get_weibo_comt_loc(self, data_sour_id_list, start_time, end_time):
         weibo_comt_loc_objs = self._coll_weibo_comt.find({"$or": [{"data_source_id": i} for i in data_sour_id_list],
                                                           "comment_time": {"$gte": start_time, "$lte": end_time}},
                                                          {"_id": 0, "country": 1, "zone": 1, "city": 1})
@@ -486,7 +513,7 @@ class WeiBo(BaseSourceMedia):
                                                                                     "$lte": end_time}}},
                                                        {"$match": {"$or": [{"data_source_id": i}
                                                                            for i in data_sour_id_list]}},
-                                                       {"$group": {"_id": "$sent", "count": {"$sum": 1}}}])
+                                                       {"$group": {"_id": "$sentiment", "count": {"$sum": 1}}}])
         return sent_stas
 
 
@@ -517,7 +544,19 @@ class WeiXin(BaseSourceMedia):
 
         else:
             news_objs = self._coll_weixin_art.find({"$or": [{"data_source_id": i} for i in data_sour_id_list],
-                                                    "publish_time": {"$gte": start_time, "$lte": end_time}})
+                                                    "publish_time": {"$gte": start_time, "$lte": end_time}},
+                                                   {
+                                                       "_id": 1,
+                                                       "title": 1,
+                                                       "main_body": 1,
+                                                       "publish_time": 1,
+                                                       "data_type": 1,
+                                                       "sentiment": 1,
+                                                       "data_media": 1,
+                                                       "click_count": 1,
+                                                       "repost_count": 1,
+                                                       "comment_count": 1,
+                                                   })
 
         contents["news_objs"] = news_objs
         return contents
@@ -538,7 +577,7 @@ class WeiXin(BaseSourceMedia):
                                                                        "$lte": end_time}}},
                                                      {"$match": {"$or": [{"data_source_id": i}
                                                                  for i in data_sour_id_list]}},
-                                                     {"$group": {"_id": "$sent",
+                                                     {"$group": {"_id": "$sentiment",
                                                                  "count": {"$sum": 1}}}])
         return sent_stas
 
@@ -569,7 +608,16 @@ class ZhiHu(BaseSourceMedia):
 
         else:
             news_objs = self._coll_zhihu.find({"$or": [{"data_source_id": i} for i in data_sour_id_list],
-                                               "publish_time": {"$gte": start_time, "$lte": end_time}})
+                                               "publish_time": {"$gte": start_time, "$lte": end_time}},
+                                              {
+                                                  "_id": 1,
+                                                  "title": 1,
+                                                  "main_body": 1,
+                                                  "publish_time": 1,
+                                                  "data_type": 1,
+                                                  "sentiment": 1,
+                                                  "data_media": 1,
+                                              })
 
         contents["news_objs"] = news_objs
         return contents
@@ -588,7 +636,7 @@ class ZhiHu(BaseSourceMedia):
         sent_stas = self._coll_zhihu.aggregate([{"$match": {"publish_time": {"$gte": start_time, "$lte": end_time}}},
                                                 {"$match": {"$or": [{"data_source_id": i}
                                                                     for i in data_sour_id_list]}},
-                                                {"$group": {"_id": "$sent", "count": {"$sum": 1}}}])
+                                                {"$group": {"_id": "$sentiment", "count": {"$sum": 1}}}])
         return sent_stas
 
 
@@ -612,7 +660,7 @@ class AppStore(object):
         app_comts_info = {}
         comts_objs = self._coll_app_comts.find({"$or": [{"data_source_id": i} for i in data_sour_id_list]})
         # dif_sent_count = self._coll_app_comts.aggregate(
-        #     [{"$group": {"_id": "$sent", "count": {"$sum": 1}}}])
+        #     [{"$group": {"_id": "$sentiment", "count": {"$sum": 1}}}])
         sent_count_dict = {"neg_count": 0, "pos_count": 0, "neu_count": 0}
         sent_obj_dict = {"neg_obj": [], "pos_obj": [], "neu_obj": []}
         rating_count_dict = {"1星": 0, "2星": 0, "3星": 0, "4星": 0, "5星": 0}
@@ -620,7 +668,7 @@ class AppStore(object):
         sort_comts_objs = comts_objs.sort("-publish_time").limit(100)
         for obj in sort_comts_objs:
             # 不同情感值评论的数量
-            sent = obj.get("comt_sent") if obj.get("comt_sent") else 0
+            sent = obj.get("comment_sentiment") if obj.get("comment_sentiment") else 0
             if sent == "negative":
                 sent_count_dict["neg_count"] += 1
                 sent_obj_dict["neg_obj"].append(seria_news_obj(obj))

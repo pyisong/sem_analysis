@@ -28,33 +28,38 @@ def pro_weixin_expression(request, pro_id):
     pass
 
 
-def pro_inform_infl(request, pro_id):
+def pro_inform_infl(request):
     """
     产品相关资讯影响力
     :param request:
-    :param pro_id:
     :return:
     """
+    pro_id = request.POST.get("pro_id", 2)
+    start_time = request.GET.get("start_time", common.default_start_time)
+    end_time = request.GET.get("end_time", common.default_end_time)
     data_sour_id_list = mysql_data.get_data_sour_id_list(int(pro_id))
-    tal_infl_dict = mongo_data.get_tal_infl(data_sour_id_list, paras=settings.MONGO_PARA)
-    tal_sev_infl = tal_infl_dict["tal_sev_infl"]
-    tal_sev_neg_infl = tal_infl_dict["tal_sev_neg_infl"]
+    tal_infl_dict = mongo_data.get_tal_infl(data_sour_id_list=data_sour_id_list,
+                                            paras=settings.MONGO_PARA,
+                                            start_time=start_time,
+                                            end_time=end_time)
+    tal_usr_def_infl = tal_infl_dict["tal_usr_def_infl"]
+    tal_usr_def_neg_infl = tal_infl_dict["tal_usr_def_neg_infl"]
 
     contents = {
-        "tal_sev_infl": tal_sev_infl,
-        "tal_sev_neg_infl": tal_sev_neg_infl
+        "tal_usr_def_infl": tal_usr_def_infl,
+        "tal_usr_def_neg_infl": tal_usr_def_neg_infl
     }
 
     return JsonResponse(contents)
 
 
-def pro_data_stas(request, pro_id):
+def pro_data_stas(request):
     """
     产品相关各个媒体的影响力统计
     :param request:
-    :param pro_id:
     :return:
     """
+    pro_id = request.POST.get("pro_id", 2)
     start_time = request.POST.get("start_time", common.default_start_time)
     end_time = request.POST.get("end_time", common.default_end_time)
     data_sour_id_list = mysql_data.get_data_sour_id_list(int(pro_id))
@@ -67,26 +72,34 @@ def pro_data_stas(request, pro_id):
     return JsonResponse(sgl_med_dict)
 
 
-def pro_weibo_usr_loc(request, pro_id):
+def pro_weibo_usr_loc(request):
     """
     产品相关微博用户的地区分布详情
     :param request:
     :param pro_id:
     :return:
     """
+    pro_id = request.POST.get("pro_id", 2)
+    start_time = request.POST.get("start_time", common.default_start_time)
+    end_time = request.POST.get("end_time", common.default_end_time)
     data_sour_id_list = mysql_data.get_data_sour_id_list(int(pro_id))
-    loc_stas_dict = mongo_data.get_weibo_usr_loc_stas(data_sour_id_list, paras=settings.MONGO_PARA)
+    loc_stas_dict = mongo_data.get_weibo_usr_loc_stas(data_sour_id_list, paras=settings.MONGO_PARA,
+                                                      start_time=start_time, end_time=end_time)
     return JsonResponse(loc_stas_dict)
 
 
-def pro_hot_med(request, pro_id):
+def pro_hot_med(request):
     """
     产品相关热门媒体排序
     :param request:
     :param pro_id:
     :return:
     """
+    pro_id = request.POST.get("pro_id", 2)
+    start_time = request.POST.get("start_time", common.default_start_time)
+    end_time = request.POST.get("end_time", common.default_end_time)
     data_sour_id_list = mysql_data.get_data_sour_id_list(int(pro_id))
-    hot_med_sort_list = mongo_data.get_hot_med_sort_list(data_sour_id_list, paras=settings.MONGO_PARA)[:10]
+    hot_med_sort_list = mongo_data.get_hot_med_sort_list(data_sour_id_list, paras=settings.MONGO_PARA,
+                                                         start_time=start_time, end_time=end_time)[:10]
     contents = {"hot_med_sort_list": hot_med_sort_list}
     return JsonResponse(contents)

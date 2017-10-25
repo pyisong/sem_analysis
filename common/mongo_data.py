@@ -41,11 +41,11 @@ def get_tal_infl(data_sour_id_list, paras, start_time=None, end_time=None):
     tal_usr_def_neg_infl = 0
     tal_sev_infl = 0
     tal_last_sev_infl = 0
-    tal_today_infl = 0
+    tal_tod_infl = 0
     tal_yest_infl = 0
-    tal_today_neg_infl = 0
+    tal_tod_neg_infl = 0
     tal_yest_neg_infl = 0
-    # tal_sev_neg_infl = 0
+    tal_sev_neg_infl = 0
 
     for value in sour_med_ins_dict.values():
         infl_dict = value.get_infl(data_sour_id_list, start_time=start_time, end_time=end_time)
@@ -63,24 +63,24 @@ def get_tal_infl(data_sour_id_list, paras, start_time=None, end_time=None):
         else:
             tal_sev_infl += infl_dict.get("sev_infl") if infl_dict.get("sev_infl") else 0
             tal_last_sev_infl += infl_dict.get("last_sev_infl") if infl_dict.get("last_sev_infl") else 0
-            tal_today_infl += infl_dict.get("today_infl") if infl_dict.get("today_infl") else 0
+            tal_tod_infl += infl_dict.get("tod_infl") if infl_dict.get("tod_infl") else 0
             tal_yest_infl += infl_dict.get("yest_infl") if infl_dict.get("yest_infl") else 0
 
-            tal_today_neg_infl += sent_infl_dict["today_sent_infl_dict"]["negative"]
+            tal_tod_neg_infl += sent_infl_dict["tod_sent_infl_dict"]["negative"]
             tal_yest_neg_infl += sent_infl_dict["yest_sent_infl_dict"]["negative"]
-            # tal_sev_neg_infl += sent_infl_dict["sev_sent_infl_dict"]["negative"]
+            tal_sev_neg_infl += sent_infl_dict["sev_sent_infl_dict"]["negative"]
 
     if start_time and end_time:
-        tal_infl_dict['tal_usr_def_neg_infl'] = tal_usr_def_neg_infl
-        tal_infl_dict['tal_usr_def_infl'] = tal_usr_def_infl
+        tal_infl_dict['tal_usr_def_neg_infl'] = round(tal_usr_def_neg_infl, 2)
+        tal_infl_dict['tal_usr_def_infl'] = round(tal_usr_def_infl, 2)
     else:
-        tal_infl_dict['tal_sev_infl'] = tal_sev_infl
-        tal_infl_dict['tal_last_sev_infl'] = tal_last_sev_infl
-        tal_infl_dict['tal_today_infl'] = tal_today_infl
-        tal_infl_dict['tal_yest_infl'] = tal_yest_infl
-        tal_infl_dict['tal_today_neg_infl'] = tal_today_neg_infl
-        tal_infl_dict['tal_yest_neg_infl'] = tal_yest_neg_infl
-        # tal_infl_dict['tal_sev_neg_infl'] = tal_sev_neg_infl
+        tal_infl_dict['tal_sev_infl'] = round(tal_sev_infl, 2)
+        tal_infl_dict['tal_last_sev_infl'] = round(tal_last_sev_infl, 2)
+        tal_infl_dict['tal_tod_infl'] = round(tal_tod_infl, 2)
+        tal_infl_dict['tal_yest_infl'] = round(tal_yest_infl, 2)
+        tal_infl_dict['tal_tod_neg_infl'] = round(tal_tod_neg_infl, 2)
+        tal_infl_dict['tal_yest_neg_infl'] = round(tal_yest_neg_infl, 2)
+        tal_infl_dict['tal_sev_neg_infl'] = round(tal_sev_neg_infl, 2)
     return tal_infl_dict
 
 
@@ -107,6 +107,9 @@ def get_sent_infl(data_sour_id_list, paras):
         tal_sev_sent_infl_dict["tal_sev_pos_infl"] += sev_sent_infl["positive"]
         tal_sev_sent_infl_dict["tal_sev_neu_infl"] += sev_sent_infl["neutral"]
         sev_sent_infl_dict[key] = sev_sent_infl
+    for k, v in tal_sev_sent_infl_dict.items():
+        d = {k: round(v, 2)}
+        tal_sev_sent_infl_dict.update(d)
 
     sent_infl_dict = {
         "tal_sev_sent_infl_dict": tal_sev_sent_infl_dict,
@@ -136,7 +139,7 @@ def get_tal_infl_chg(data_sour_id_list, paras, start_time=None, end_time=None):
         tal_sev_infl_chg = 0
 
     if tal_infl_dict["tal_yest_infl"] > 0:
-        tal_day_infl_chg = (float(tal_infl_dict["tal_today_infl"]) - float(tal_infl_dict["tal_yest_infl"])
+        tal_day_infl_chg = (float(tal_infl_dict["tal_tod_infl"]) - float(tal_infl_dict["tal_yest_infl"])
                             ) / float(tal_infl_dict["tal_yest_infl"])
         
         tal_day_infl_chg = "%.2f" % (tal_day_infl_chg * 100) + "%"
@@ -144,7 +147,7 @@ def get_tal_infl_chg(data_sour_id_list, paras, start_time=None, end_time=None):
         tal_day_infl_chg = 0
 
     if tal_infl_dict["tal_yest_neg_infl"] > 0:
-        tal_day_neg_infl_chg = (float(tal_infl_dict["tal_today_neg_infl"]) - float(tal_infl_dict["tal_yest_neg_infl"])
+        tal_day_neg_infl_chg = (float(tal_infl_dict["tal_tod_neg_infl"]) - float(tal_infl_dict["tal_yest_neg_infl"])
                                 ) / float(tal_infl_dict["tal_yest_neg_infl"])
         
         tal_day_neg_infl_chg = "%.2f" % (tal_day_neg_infl_chg * 100) + "%"
@@ -160,39 +163,44 @@ def get_tal_infl_chg(data_sour_id_list, paras, start_time=None, end_time=None):
     return contents
 
 
-def get_weibo_usr_loc_stas(data_sour_id_list, paras):
+def get_weibo_usr_loc_stas(data_sour_id_list, paras, start_time, end_time):
     """
     相关微博评论用户的所在地统计
+    :param end_time:
+    :param start_time:
     :param paras:
     :param data_sour_id_list:
     :return:
     """
     weibo_ins = source_media.WeiBo(paras)
-    weibo_comt_loc_objs = weibo_ins.get_weibo_comt_loc(data_sour_id_list).clone()
+    weibo_comt_loc_objs = weibo_ins.get_weibo_comt_loc(data_sour_id_list,
+                                                       start_time=start_time,
+                                                       end_time=end_time).clone()
     loc_list = []
     for item in weibo_comt_loc_objs:
         country = item.get("country") if item.get("country") else u"无"
         zone = item.get("zone") if item.get("zone") else u"无"
-        # city = item.get("city") if item.get("city") else u"无"
-        loc_list.append(country + "-" + zone)
+        city = item.get("city") if item.get("city") else item.get("zone")
+        loc_list.append(country + "-" + zone + "-" + city)
     loc_stas_dict = dict(Counter(loc_list))
     return loc_stas_dict
 
 
-def get_hot_med_sort_list(data_sour_id_list, paras):
+def get_hot_med_sort_list(data_sour_id_list, paras, start_time, end_time):
     """
     得到按照新闻量排序的由媒体和新闻量组成的元组的列表
+    :param end_time:
+    :param start_time:
     :param data_sour_id_list:
     :param paras:
     :return:
     """
     sour_med_ins_dict = get_sour_med_ins_dict(paras)
     hot_med_list = []
-    time_dict = common.get_time()
     for key in sour_med_ins_dict:
         hot_med_objs = sour_med_ins_dict[key].get_hot_med_obj(data_sour_id_list=data_sour_id_list,
-                                                              start_time=time_dict["sev_ago_time"],
-                                                              end_time=time_dict["now_time"])
+                                                              start_time=start_time,
+                                                              end_time=end_time)
         if key in ["baidu_search", "zhihu"]:
             for item in hot_med_objs:
                 med = item.get("med") if item.get("author") else u"无"
@@ -239,4 +247,4 @@ def get_contents_expression(contents):
     pass
 
 if __name__ == '__main__':
-    print get_hot_med_sort_list(data_sour_id_list=[2], paras=MONGO_PARA)
+    pass

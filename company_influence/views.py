@@ -60,11 +60,11 @@ def comp_inform_infl(request):
                                             end_time=end_time)
 
     tal_usr_def_infl = tal_infl_dict["tal_usr_def_infl"]
-    tal_usr_def_sent_infl = tal_infl_dict["tal_usr_def_sent_infl"]
+    tal_usr_def_neg_infl = tal_infl_dict["tal_usr_def_neg_infl"]
 
     contents = {
         "tal_usr_def_infl": tal_usr_def_infl,
-        "tal_usr_def_sent_infl": tal_usr_def_sent_infl
+        "tal_usr_def_neg_infl": tal_usr_def_neg_infl
     }
 
     return JsonResponse(contents)
@@ -77,11 +77,15 @@ def comp_data_stas(request):
     :return:
     """
     comp_id = request.POST.get("comp_id", 2)
+    start_time = request.GET.get("start_time", common.default_start_time)
+    end_time = request.GET.get("end_time", common.default_end_time)
     data_sour_id_list = mysql_data.get_data_sour_id_list(int(comp_id))
     sour_med_ins_dict = mongo_data.get_sour_med_ins_dict(paras=settings.MONGO_PARA)
     sgl_med_dict = {}
     for key in sour_med_ins_dict:
-        sgl_med_dict[key] = sour_med_ins_dict[key].get_infl(data_sour_id_list)["sev_infl"]
+        sgl_med_dict[key] = sour_med_ins_dict[key].get_infl(data_sour_id_list=data_sour_id_list,
+                                                            start_time=start_time,
+                                                            end_time=end_time)["usr_def_infl"]
 
     return JsonResponse(sgl_med_dict)
 
@@ -93,8 +97,13 @@ def comp_weibo_usr_loc(request):
     :return:
     """
     comp_id = request.POST.get("comp_id", 2)
+    start_time = request.GET.get("start_time", common.default_start_time)
+    end_time = request.GET.get("end_time", common.default_end_time)
     data_sour_id_list = mysql_data.get_data_sour_id_list(int(comp_id))
-    loc_stas_dict = mongo_data.get_weibo_usr_loc_stas(data_sour_id_list, paras=settings.MONGO_PARA)
+    loc_stas_dict = mongo_data.get_weibo_usr_loc_stas(data_sour_id_list,
+                                                      paras=settings.MONGO_PARA,
+                                                      start_time=start_time,
+                                                      end_time=end_time)
     return JsonResponse(loc_stas_dict)
 
 
@@ -105,7 +114,12 @@ def comp_hot_med(request):
     :return:
     """
     comp_id = request.POST.get("comp_id", 2)
+    start_time = request.GET.get("start_time", common.default_start_time)
+    end_time = request.GET.get("end_time", common.default_end_time)
     data_sour_id_list = mysql_data.get_data_sour_id_list(int(comp_id))
-    hot_med_sort_list = mongo_data.get_hot_med_sort_list(data_sour_id_list, paras=settings.MONGO_PARA)[:10]
+    hot_med_sort_list = mongo_data.get_hot_med_sort_list(data_sour_id_list,
+                                                         paras=settings.MONGO_PARA,
+                                                         start_time=start_time,
+                                                         end_time=end_time)[:10]
     contents = {"hot_med_sort_list": hot_med_sort_list}
     return JsonResponse(contents)

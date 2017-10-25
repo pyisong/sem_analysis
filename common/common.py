@@ -5,8 +5,8 @@ import pymongo.cursor
 
 # default_start_time = (datetime.datetime.now() - datetime.timedelta(days=7)).strftime('%Y-%m-%d %H:%M:%S')
 # default_end_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-default_start_time = "2013-01-01 00:00:00"
-default_end_time = "2017-09-09 00:00:00"
+default_start_time = "2017-10-19 00:00:00"
+default_end_time = "2017-10-25 00:00:00"
 
 
 def get_time():
@@ -28,11 +28,11 @@ def get_time():
     # time_dict['tod_start_time'] = tod_start_time
     # time_dict['now_time'] = now_time
 
-    time_dict['fourteen_ago_time'] = "2017-01-01 00:00:00"
-    time_dict['sev_ago_time'] = "2013-01-01 00:00:00"
-    time_dict['yest_time'] = "2017-01-01 00:00:00"
-    time_dict['tod_start_time'] = "2013-01-01 00:00:00"
-    time_dict['now_time'] = "2017-09-09 00:00:00"
+    time_dict['fourteen_ago_time'] = "2017-10-10 00:00:00"
+    time_dict['sev_ago_time'] = "2017-10-19 00:00:00"
+    time_dict['yest_time'] = "2017-10-24 00:00:00"
+    time_dict['tod_start_time'] = "2017-10-25 00:00:00"
+    time_dict['now_time'] = "2017-10-25 23:00:00"
     return time_dict
 
 

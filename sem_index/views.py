@@ -57,13 +57,13 @@ def tod_sem(request, company_id):
     sour_med_ins_dict = mongo_data.get_sour_med_ins_dict(paras=settings.MONGO_PARA)
     contents = {}
     for key in sour_med_ins_dict:
-        sent_statistics = sour_med_ins_dict[key].get_sent_statistics(
+        sent_stas = sour_med_ins_dict[key].get_sent_stas(
             data_sour_id_list=data_sour_id_list,
             start_time=common.default_start_time,
             end_time=common.default_end_time
         )
         contents[key] = {"negative": 0, "positive": 0, "neutral": 0}
-        for item in sent_statistics:
+        for item in sent_stas:
             # 'negative', 'positive', 'neutral'
             contents[key][item.get("_id")] += item.get("count")
     return JsonResponse(contents)
