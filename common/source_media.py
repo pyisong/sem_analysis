@@ -300,7 +300,7 @@ class BaiDuSearch(BaseSourceMedia):
     def get_hot_med_obj(self, data_sour_id_list, start_time, end_time):
         hot_med_obj = self._coll_search_baidu.find({"$or": [{"data_source_id": i} for i in data_sour_id_list],
                                                     "publish_time": {"$gte": start_time, "$lte": end_time}},
-                                                   {"_id": 0, "med": 1})
+                                                   {"_id": 0, "media": 1})
         return hot_med_obj
 
     def get_sent_stas(self, data_sour_id_list, start_time, end_time):
@@ -343,7 +343,7 @@ class BaiDuTieBa(BaseSourceMedia):
                                               {
                                                   "_id": 1,
                                                   "title": 1,
-                                                  "main_body": 1,
+                                                  "content": 1,
                                                   "publish_time": 1,
                                                   "data_type": 1,
                                                   "sentiment": 1,
@@ -406,7 +406,8 @@ class BaiDuZhiDao(BaseSourceMedia):
                                                {
                                                    "_id": 1,
                                                    "title": 1,
-                                                   "main_body": 1,
+                                                   "question": 1,
+                                                   "answer_count": 1,
                                                    "publish_time": 1,
                                                    "data_type": 1,
                                                    "sentiment": 1,
@@ -427,7 +428,7 @@ class BaiDuZhiDao(BaseSourceMedia):
     def get_hot_med_obj(self, data_sour_id_list, start_time, end_time):
         hot_med_obj = self._coll_zhidao.find({"$or": [{"data_source_id": i} for i in data_sour_id_list],
                                              "publish_time": {"$gte": start_time, "$lte": end_time}},
-                                             {"_id": 0, "med": 1})
+                                             {"_id": 0, "author": 1})
         return hot_med_obj
 
     def get_sent_stas(self, data_sour_id_list, start_time, end_time):
@@ -505,7 +506,7 @@ class WeiBo(BaseSourceMedia):
     def get_hot_med_obj(self, data_sour_id_list, start_time, end_time):
         hot_med_obj = self._coll_search_weibo.find({"$or": [{"data_source_id": i} for i in data_sour_id_list],
                                                     "publish_time": {"$gte": start_time, "$lte": end_time}},
-                                                   {"_id": 0, "med": 1})
+                                                   {"_id": 0, "author": 1})
         return hot_med_obj
 
     def get_sent_stas(self, data_sour_id_list, start_time, end_time):
@@ -568,7 +569,7 @@ class WeiXin(BaseSourceMedia):
     def get_hot_med_obj(self, data_sour_id_list, start_time, end_time):
         hot_med_obj = self._coll_weixin_art.find({"$or": [{"data_source_id": i} for i in data_sour_id_list],
                                                   "publish_time": {"$gte": start_time, "$lte": end_time}},
-                                                 {"_id": 0, "med": 1})
+                                                 {"_id": 0, "author": 1})
         return hot_med_obj
 
     def get_sent_stas(self, data_sour_id_list, start_time, end_time):
@@ -629,7 +630,7 @@ class ZhiHu(BaseSourceMedia):
     def get_hot_med_obj(self, data_sour_id_list, start_time, end_time):
         hot_med_obj = self._coll_zhihu.find({"$or": [{"data_source_id": i} for i in data_sour_id_list],
                                              "publish_time": {"$gte": start_time, "$lte": end_time}},
-                                            {"_id": 0, "med": 1})
+                                            {"_id": 0, "media": 1})
         return hot_med_obj
 
     def get_sent_stas(self, data_sour_id_list, start_time, end_time):
@@ -657,15 +658,26 @@ class AppStore(object):
         :param data_sour_id_list:
         :return:
         """
+        # 用户评论内容、用户账号名称、用户评论时间、用户评论情感值
         app_comts_info = {}
-        comts_objs = self._coll_app_comts.find({"$or": [{"data_source_id": i} for i in data_sour_id_list]})
+        comts_objs = self._coll_app_comts.find({"$or": [{"data_source_id": i} for i in data_sour_id_list]},
+                                               {
+                                                   "comment_content": 1,
+                                                   "comment_time": 1,
+                                                   "comment_sentiment": 1,
+                                                   "user_name": 1,
+                                                   "rating": 1,
+                                                   "_id": 0,
+                                               })
         # dif_sent_count = self._coll_app_comts.aggregate(
         #     [{"$group": {"_id": "$sentiment", "count": {"$sum": 1}}}])
+
         sent_count_dict = {"neg_count": 0, "pos_count": 0, "neu_count": 0}
         sent_obj_dict = {"neg_obj": [], "pos_obj": [], "neu_obj": []}
         rating_count_dict = {"1星": 0, "2星": 0, "3星": 0, "4星": 0, "5星": 0}
         rating_obj_dict = {"1星": [], "2星": [], "3星": [], "4星": [], "5星": []}
         sort_comts_objs = comts_objs.sort("-publish_time").limit(100)
+
         for obj in sort_comts_objs:
             # 不同情感值评论的数量
             sent = obj.get("comment_sentiment") if obj.get("comment_sentiment") else 0
@@ -703,22 +715,28 @@ class AppStore(object):
         app_comts_info["rating_obj_dict"] = rating_obj_dict
         return app_comts_info
 
-    def get_app_bd_info_obj(self, data_sour_id_list):
+    def get_app_bd_info_obj(self, data_sour_id_list, start_time, end_time):
         """
         得到app榜单coll中的数据
+        :param end_time:
+        :param start_time:
         :param data_sour_id_list:
         :return:
         """
-        app_bd_info_obj = self._coll_app_bd.find({"$or": [{"data_source_id": i} for i in data_sour_id_list]})
+        app_bd_info_obj = self._coll_app_bd.find({"$or": [{"data_source_id": i} for i in data_sour_id_list],
+                                                  "publish_time": {"$gte": start_time, "$lte": end_time}})
         return seria_news_obj(app_bd_info_obj)
 
-    def get_app_det_obj(self, data_sour_id_list):
+    def get_app_det_obj(self, data_sour_id_list, start_time, end_time):
         """
         得到app详情coll中的数据
+        :param end_time:
+        :param start_time:
         :param data_sour_id_list:
         :return:
         """
-        app_det_obj = self._coll_app_det.find({"$or": [{"data_source_id": i} for i in data_sour_id_list]})
+        app_det_obj = self._coll_app_det.find({"$or": [{"data_source_id": i} for i in data_sour_id_list],
+                                               "publish_time": {"$gte": start_time, "$lte": end_time}})
         return seria_news_obj(app_det_obj)
 
 

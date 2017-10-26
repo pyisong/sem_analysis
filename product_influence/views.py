@@ -18,11 +18,10 @@ def pro_search_exponent(request):
     pass
 
 
-def pro_weixin_expression(request, pro_id):
+def pro_weixin_expression(request):
     """
     统计7天，产品相关微信及相关微信评论中的表情的前三名
     :param request:
-    :param pro_id:
     :return:
     """
     pass
@@ -76,7 +75,6 @@ def pro_weibo_usr_loc(request):
     """
     产品相关微博用户的地区分布详情
     :param request:
-    :param pro_id:
     :return:
     """
     pro_id = request.POST.get("pro_id", 2)
@@ -92,7 +90,6 @@ def pro_hot_med(request):
     """
     产品相关热门媒体排序
     :param request:
-    :param pro_id:
     :return:
     """
     pro_id = request.POST.get("pro_id", 2)

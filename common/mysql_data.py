@@ -13,6 +13,15 @@ def get_company_id(use_id):
     return result[0]
 
 
+def get_event_createtime(event_id):
+    db = settings.get_mysql_db_test()
+    cursor = db.cursor()
+    sql = "select createtime from monitor_event_info where event_id=%s"
+    cursor.execute(sql, 1)
+    result = cursor.fetchone()
+    return str(result[0])
+
+
 def get_data_sour_id_list(*relate_id):
     db = settings.get_mysql_db_test()
     sql = 'SELECT data_source_id FROM sem_monitor_crawl_info WHERE company_id=%s'

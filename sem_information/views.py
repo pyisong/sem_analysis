@@ -26,7 +26,7 @@ def inform_list(request):
     get_sort_news_objs_list = mongo_data.get_sort_news_objs_list(data_sour_id_list,
                                                                  paras=settings.MONGO_PARA,
                                                                  start_time=start_time,
-                                                                 end_time=end_time)[:10]
+                                                                 end_time=end_time)[:5]
     contents = {"get_sort_news_objs_list": get_sort_news_objs_list}
     return JsonResponse(contents)
 

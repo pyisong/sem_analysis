@@ -2,7 +2,6 @@
 import source_media
 import common
 from collections import Counter
-from settings import MONGO_PARA
 
 
 def get_sour_med_ins_dict(paras):
@@ -101,15 +100,14 @@ def get_sent_infl(data_sour_id_list, paras):
     
     sev_sent_infl_dict = {}
     for key in sour_med_ins_dict:
-        sev_sent_infl = sour_med_ins_dict[key].get_sent_infl(
-            data_sour_id_list)['sev_sent_infl_dict']
+        sev_sent_infl = sour_med_ins_dict[key].get_sent_infl(data_sour_id_list)['sev_sent_infl_dict']
         tal_sev_sent_infl_dict["tal_sev_neg_infl"] += sev_sent_infl["negative"]
         tal_sev_sent_infl_dict["tal_sev_pos_infl"] += sev_sent_infl["positive"]
         tal_sev_sent_infl_dict["tal_sev_neu_infl"] += sev_sent_infl["neutral"]
         sev_sent_infl_dict[key] = sev_sent_infl
+
     for k, v in tal_sev_sent_infl_dict.items():
-        d = {k: round(v, 2)}
-        tal_sev_sent_infl_dict.update(d)
+        tal_sev_sent_infl_dict[k] = round(v, 2)
 
     sent_infl_dict = {
         "tal_sev_sent_infl_dict": tal_sev_sent_infl_dict,
@@ -203,7 +201,7 @@ def get_hot_med_sort_list(data_sour_id_list, paras, start_time, end_time):
                                                               end_time=end_time)
         if key in ["baidu_search", "zhihu"]:
             for item in hot_med_objs:
-                med = item.get("med") if item.get("author") else u"无"
+                med = item.get("media") if item.get("media") else u"无"
                 hot_med_list.append(med)
         if key in ["baidu_tieba", "weibo", "weixin"]:
             for item in hot_med_objs:
