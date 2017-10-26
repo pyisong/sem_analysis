@@ -157,7 +157,9 @@ def app_info(request, company_id):
     """
     data_sour_id_list = mysql_data.get_data_sour_id_list(int(company_id))
     app_store_ins = source_media.AppStore(paras=settings.MONGO_PARA)
-    app_bd_info = app_store_ins.get_app_bd_info_obj(data_sour_id_list)
+    app_bd_info = app_store_ins.get_app_bd_info_obj(data_sour_id_list=data_sour_id_list,
+                                                    start_time=common.default_start_time,
+                                                    end_time=common.default_end_time)
     app_comts_info = app_store_ins.get_app_comts_info(data_sour_id_list)
     # app_detail = app_store_ins.get_app_detail_obj(data_sour_id_list)
     contents = {
